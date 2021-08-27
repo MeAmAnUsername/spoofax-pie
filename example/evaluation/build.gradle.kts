@@ -1,5 +1,5 @@
 plugins {
-  id("org.metaborg.gradle.config.java-library")
+  id("org.metaborg.gradle.config.java-application")
 }
 
 val pieVersion = "15.0.0"
@@ -7,4 +7,11 @@ val pieVersion = "15.0.0"
 dependencies {
   implementation("org.metaborg", "pie.api", pieVersion)
   implementation("org.metaborg", "pie.runtime", pieVersion)
+}
+
+task<JavaExec>("evaluate") {
+  group = "Evaluation"
+  description = "Evaluate the case studies for Ivo's thesis"
+  classpath = sourceSets["main"].runtimeClasspath
+  main = "pl.thesis.evaluation.Main"
 }

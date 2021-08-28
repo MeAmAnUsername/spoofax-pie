@@ -7,6 +7,9 @@ val pieVersion = "15.0.0"
 dependencies {
   implementation("org.metaborg", "pie.api", pieVersion)
   implementation("org.metaborg", "pie.runtime", pieVersion)
+  implementation("org.metaborg", "common", "5.0.0")
+
+  compileOnly("org.checkerframework:checker-qual-android")
 }
 
 task<JavaExec>("evaluate") {

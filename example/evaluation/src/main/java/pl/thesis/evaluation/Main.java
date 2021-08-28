@@ -1,38 +1,36 @@
 package pl.thesis.evaluation;
 
-import mb.pie.api.ExecContext;
+import mb.common.result.Result;
 import mb.pie.api.ExecException;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.MixedSession;
-import mb.pie.api.None;
 import mb.pie.api.Pie;
-import mb.pie.api.TaskDef;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.resource.fs.FSPath;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import pl.thesis.evaluation.tasks.CountFileLines;
+import pl.thesis.evaluation.tasks.CountLines;
+import pl.thesis.evaluation.tasks.EvaluateProject;
+import pl.thesis.evaluation.tasks.ProjectEvaluationResult;
+
+import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
-        TaskDef<None, None> main = new Greet();
+        CountFileLines countFileLines = new CountFileLines();
+        CountLines countLines = new CountLines(countFileLines);
+        EvaluateProject main = new EvaluateProject(countLines);
 
         Pie pie = new PieBuilderImpl()
-            .addTaskDefs(new MapTaskDefs(main))
+            .addTaskDefs(new MapTaskDefs(countFileLines, countLines, main))
             .build();
 
         try(MixedSession session = pie.newSession()) {
-            session.require(main.createTask(None.instance));
+            FSPath srcDir = new FSPath(Paths.get("src"));
+            Result<ProjectEvaluationResult, @NonNull Exception> res = session.require(main.createTask(srcDir));
+            System.out.println("Done: " + res);
         } catch(ExecException | InterruptedException e) {
             e.printStackTrace();
-        }
-    }
-
-    static class Greet implements TaskDef<None, None> {
-        @java.lang.Override
-        public String getId() {
-            return getClass().getSimpleName();
-        }
-
-        public None exec(ExecContext context, None input) {
-            System.out.println("Hello world!");
-            return None.instance;
         }
     }
 }

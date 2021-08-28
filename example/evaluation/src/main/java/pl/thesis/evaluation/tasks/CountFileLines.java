@@ -29,7 +29,6 @@ public class CountFileLines implements TaskDef<@NonNull ResourcePath, @NonNull R
                     lineCount++;
                 }
             }
-            assert(inputStream.read() == -1);
             if (lastChar != '\n') {
                 // a file with x lines only has x-1 newline characters, so add 1
                 // Exception: do not count a trailing newline as a line (do not add 1 if file has a trailing newline)

@@ -22,10 +22,10 @@ public class CountFileLines implements TaskDef<@NonNull ResourcePath, @NonNull R
         try(InputStream inputStream = context.getReadableResource(input).openRead()) {
             int lineCount = 0;
             int lastChar = '\n';
-            int b;
-            while((b = inputStream.read()) != -1) {
-                lastChar = b;
-                if (b == '\n') {
+            int chr;
+            while((chr = inputStream.read()) != -1) {
+                lastChar = chr;
+                if (chr == '\n') {
                     lineCount++;
                 }
             }

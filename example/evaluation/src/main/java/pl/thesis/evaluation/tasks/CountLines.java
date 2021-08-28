@@ -33,7 +33,6 @@ public class CountLines implements TaskDef<@NonNull ResourcePath, @NonNull Resul
                 .walk(ResourceMatcher.ofFileExtension("java"))
                 .map(file -> context.require(countFileLines.createTask(file.getPath())))
                 .forEach(result -> result.ifElse(javaLineCounts::addAndGet, errors::add));
-            // todo: can also use Collectors.groupingBy to split into IOException / line count?
             // todo: count pie lines as well
             if (!errors.isEmpty()) {
                 return Result.ofErr(new CompositeException(errors));

@@ -8,6 +8,8 @@ import mb.pie.api.Pie;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.fs.FSPath;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import pl.thesis.evaluation.tasks.CountCharacters;
+import pl.thesis.evaluation.tasks.CountFileCharacters;
 import pl.thesis.evaluation.tasks.CountFileLines;
 import pl.thesis.evaluation.tasks.CountLines;
 import pl.thesis.evaluation.tasks.EvaluateProject;
@@ -19,15 +21,17 @@ public class Main {
     public static void main(String[] args) {
         CountFileLines countFileLines = new CountFileLines();
         CountLines countLines = new CountLines(countFileLines);
-        EvaluateProject main = new EvaluateProject(countLines);
+        CountFileCharacters countFileCharacters = new CountFileCharacters();
+        CountCharacters countCharacters = new CountCharacters(countFileCharacters);
+        EvaluateProject main = new EvaluateProject(countLines, countCharacters);
 
         Pie pie = new PieBuilderImpl()
-            .addTaskDefs(new MapTaskDefs(countFileLines, countLines, main))
+            .addTaskDefs(new MapTaskDefs(countFileLines, countLines, countFileCharacters, countCharacters, main))
             .build();
 
         try(MixedSession session = pie.newSession()) {
             FSPath srcDir = new FSPath(Paths.get("src"));
-            Result<ProjectEvaluationResult, @NonNull Exception> res = session.require(main.createTask(srcDir));
+            Result<@NonNull ProjectEvaluationResult, @NonNull Exception> res = session.require(main.createTask(srcDir));
             System.out.println("Done: " + res);
         } catch(ExecException | InterruptedException e) {
             e.printStackTrace();

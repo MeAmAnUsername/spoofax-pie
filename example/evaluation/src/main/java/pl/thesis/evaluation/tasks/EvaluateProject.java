@@ -6,11 +6,13 @@ import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class EvaluateProject implements TaskDef<@NonNull ResourcePath, @NonNull Result<ProjectEvaluationResult, @NonNull Exception>> {
-    private final CountLines countLines;
+public class EvaluateProject implements TaskDef<@NonNull ResourcePath, @NonNull Result<@NonNull ProjectEvaluationResult, @NonNull Exception>> {
+    @NonNull private final CountLines countLines;
+    @NonNull private final CountCharacters countCharacters;
 
-    public EvaluateProject(CountLines countLines) {
+    public EvaluateProject(@NonNull CountLines countLines, @NonNull CountCharacters countCharacters) {
         this.countLines = countLines;
+        this.countCharacters = countCharacters;
     }
 
     @Override
@@ -21,13 +23,19 @@ public class EvaluateProject implements TaskDef<@NonNull ResourcePath, @NonNull 
 
     @Override
     @NonNull
-    public Result<ProjectEvaluationResult, @NonNull Exception> exec(ExecContext context, @NonNull ResourcePath input) {
+    public Result<@NonNull ProjectEvaluationResult, @NonNull Exception> exec(ExecContext context, @NonNull ResourcePath input) {
         Result<LineCounts, @NonNull Exception> lineCounts = context.require(countLines.createTask(input));
         if (lineCounts.isErr()) {
             //noinspection ConstantConditions  Safe because isErr() returned true
             return Result.ofErr(lineCounts.getErr());
         }
+        Result<ProjectCounts, @NonNull Exception> characterCounts = context.require(countCharacters.createTask(input));
+        if (characterCounts.isErr()) {
+            //noinspection ConstantConditions  Safe because isErr() returned true
+            return Result.ofErr(characterCounts.getErr());
+        }
 
-        return Result.ofOk(new ProjectEvaluationResult(lineCounts.get()));
+        //noinspection ConstantConditions  Safe because isErr() returned false
+        return Result.ofOk(new ProjectEvaluationResult(lineCounts.get(), characterCounts.get()));
     }
 }

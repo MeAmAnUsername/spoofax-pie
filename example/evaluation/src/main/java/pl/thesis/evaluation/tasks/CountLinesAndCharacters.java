@@ -13,11 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CountCharacters implements TaskDef<@NonNull ResourcePath, @NonNull Result<@NonNull ProjectCounts, @NonNull Exception>> {
-    @NonNull private final CountFileCharacters countFileCharacters;
+public class CountLinesAndCharacters implements TaskDef<@NonNull ResourcePath, @NonNull Result<@NonNull ProjectCounts, @NonNull Exception>> {
+    @NonNull private final CountFileLinesAndCharacters countFileLinesAndCharacters;
 
-    public CountCharacters(@NonNull CountFileCharacters countFileCharacters) {
-        this.countFileCharacters = countFileCharacters;
+    public CountLinesAndCharacters(@NonNull CountFileLinesAndCharacters countFileLinesAndCharacters) {
+        this.countFileLinesAndCharacters = countFileLinesAndCharacters;
     }
 
     @java.lang.Override
@@ -34,10 +34,10 @@ public class CountCharacters implements TaskDef<@NonNull ResourcePath, @NonNull 
             HierarchicalResource dir = context.require(input);
             dir.walkForEach(ResourceMatcher.ofDirectory(), context::require);
             dir.walk(ResourceMatcher.ofFileExtension("java"))
-                .map(file -> context.require(countFileCharacters.createTask(file.getPath())))
+                .map(file -> context.require(countFileLinesAndCharacters.createTask(file.getPath())))
                 .forEach(result -> result.ifElse(javaCounts::addFileCounts, errors::add));
             dir.walk(ResourceMatcher.ofFileExtension("pie"))
-                .map(file -> context.require(countFileCharacters.createTask(file.getPath())))
+                .map(file -> context.require(countFileLinesAndCharacters.createTask(file.getPath())))
                 .forEach(result -> result.ifElse(pieCounts::addFileCounts, errors::add));
             if (!errors.isEmpty()) {
                 return Result.ofErr(new CompositeException(errors));

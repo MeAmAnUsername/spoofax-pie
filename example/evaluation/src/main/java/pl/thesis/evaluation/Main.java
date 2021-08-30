@@ -8,10 +8,8 @@ import mb.pie.api.Pie;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.fs.FSPath;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import pl.thesis.evaluation.tasks.CountCharacters;
-import pl.thesis.evaluation.tasks.CountFileCharacters;
-import pl.thesis.evaluation.tasks.CountFileLines;
-import pl.thesis.evaluation.tasks.CountLines;
+import pl.thesis.evaluation.tasks.CountLinesAndCharacters;
+import pl.thesis.evaluation.tasks.CountFileLinesAndCharacters;
 import pl.thesis.evaluation.tasks.EvaluateProject;
 import pl.thesis.evaluation.tasks.ProjectEvaluationResult;
 
@@ -19,14 +17,12 @@ import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
-        CountFileLines countFileLines = new CountFileLines();
-        CountLines countLines = new CountLines(countFileLines);
-        CountFileCharacters countFileCharacters = new CountFileCharacters();
-        CountCharacters countCharacters = new CountCharacters(countFileCharacters);
-        EvaluateProject main = new EvaluateProject(countLines, countCharacters);
+        CountFileLinesAndCharacters countFileLinesAndCharacters = new CountFileLinesAndCharacters();
+        CountLinesAndCharacters countLinesAndCharacters = new CountLinesAndCharacters(countFileLinesAndCharacters);
+        EvaluateProject main = new EvaluateProject(countLinesAndCharacters);
 
         Pie pie = new PieBuilderImpl()
-            .addTaskDefs(new MapTaskDefs(countFileLines, countLines, countFileCharacters, countCharacters, main))
+            .addTaskDefs(new MapTaskDefs(countFileLinesAndCharacters, countLinesAndCharacters, main))
             .build();
 
         try(MixedSession session = pie.newSession()) {

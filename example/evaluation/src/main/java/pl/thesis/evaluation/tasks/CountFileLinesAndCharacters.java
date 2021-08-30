@@ -11,7 +11,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class CountFileCharacters implements TaskDef<@NonNull ResourcePath, @NonNull Result<FileCounts, @NonNull Exception>> {
+public class CountFileLinesAndCharacters implements TaskDef<@NonNull ResourcePath, @NonNull Result<FileCounts, @NonNull Exception>> {
     private enum ParseState {
         REGULAR,
         STRING,

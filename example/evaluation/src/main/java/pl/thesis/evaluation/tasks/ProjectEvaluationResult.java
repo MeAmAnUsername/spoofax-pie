@@ -5,30 +5,27 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.Objects;
 
 public class ProjectEvaluationResult {
-    @NonNull public final LineCounts lineCounts;
-    @NonNull public final ProjectCounts characterCounts;
+    @NonNull public final ProjectCounts projectCounts;
 
-    public ProjectEvaluationResult(@NonNull LineCounts lineCounts, @NonNull ProjectCounts characterCounts) {
-        this.lineCounts = lineCounts;
-        this.characterCounts = characterCounts;
+    public ProjectEvaluationResult(@NonNull ProjectCounts projectCounts) {
+        this.projectCounts = projectCounts;
     }
 
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         ProjectEvaluationResult that = (ProjectEvaluationResult)o;
-        return lineCounts.equals(that.lineCounts) && characterCounts.equals(that.characterCounts);
+        return projectCounts.equals(that.projectCounts);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lineCounts, characterCounts);
+        return Objects.hash(projectCounts);
     }
 
     @Override public String toString() {
         return "ProjectEvaluationResult{" +
-            "lineCounts=" + lineCounts +
-            ", characterCounts=" + characterCounts +
+            "projectCounts=" + projectCounts +
             '}';
     }
 }

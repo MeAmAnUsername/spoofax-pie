@@ -31,7 +31,8 @@ public class CountLines implements TaskDef<@NonNull ResourcePath, @NonNull Resul
             AtomicInteger javaLineCounts = new AtomicInteger();
             AtomicInteger pieLineCounts = new AtomicInteger();
             List<IOException> errors = new ArrayList<>();
-            HierarchicalResource dir = context.getHierarchicalResource(input);
+            HierarchicalResource dir = context.require(input);
+            dir.walkForEach(ResourceMatcher.ofDirectory(), context::require);
             dir.walk(ResourceMatcher.ofFileExtension("java"))
                 .map(file -> context.require(countFileLines.createTask(file.getPath())))
                 .forEach(result -> result.ifElse(javaLineCounts::addAndGet, errors::add));

@@ -26,7 +26,7 @@ public class Main {
             .build();
 
         try(MixedSession session = pie.newSession()) {
-            FSPath srcDir = new FSPath(Paths.get("src"));
+            FSPath srcDir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.spoofax", "src", "main"));
             Result<@NonNull ProjectEvaluationResult, @NonNull Exception> res = session.require(main.createTask(srcDir));
             System.out.println("Done: " + res);
         } catch(ExecException | InterruptedException e) {

@@ -1,32 +1,39 @@
 package pl.thesis.evaluation.tasks;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class FileCounts implements Serializable {
-    public final int includingLayout;
-    public final int excludingLayout;
+    public final int linesIncludingLayout;
+    public final int linesExcludingLayout;
+    public final int charsIncludingLayout;
+    public final int charsExcludingLayout;
 
-    public FileCounts(int includingLayout, int excludingLayout) {
-        this.includingLayout = includingLayout;
-        this.excludingLayout = excludingLayout;
+    public FileCounts(int linesIncludingLayout, int linesExcludingLayout, int charsIncludingLayout, int charsExcludingLayout) {
+        this.linesIncludingLayout = linesIncludingLayout;
+        this.linesExcludingLayout = linesExcludingLayout;
+        this.charsIncludingLayout = charsIncludingLayout;
+        this.charsExcludingLayout = charsExcludingLayout;
     }
 
-    public boolean equals(Object object) {
-        if(this == object) return true;
-        if(object == null || getClass() != object.getClass()) return false;
-        if(!super.equals(object)) return false;
-        FileCounts that = (FileCounts)object;
-        return includingLayout == that.includingLayout && excludingLayout == that.excludingLayout;
+    @Override public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        FileCounts that = (FileCounts)o;
+        return linesIncludingLayout == that.linesIncludingLayout && linesExcludingLayout == that.linesExcludingLayout && charsIncludingLayout == that.charsIncludingLayout && charsExcludingLayout == that.charsExcludingLayout;
     }
 
+    @Override
     public int hashCode() {
-        return java.util.Objects.hash(super.hashCode(), includingLayout, excludingLayout);
+        return Objects.hash(linesIncludingLayout, linesExcludingLayout, charsIncludingLayout, charsExcludingLayout);
     }
 
     @Override public String toString() {
-        return "LineCounts{" +
-            "includingLayout=" + includingLayout +
-            ", excludingLayout=" + excludingLayout +
+        return "FileCounts{" +
+            "linesIncludingLayout=" + linesIncludingLayout +
+            ", linesExcludingLayout=" + linesExcludingLayout +
+            ", charsIncludingLayout=" + charsIncludingLayout +
+            ", charsExcludingLayout=" + charsExcludingLayout +
             '}';
     }
 }

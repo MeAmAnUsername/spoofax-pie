@@ -31,6 +31,9 @@ public class CountFileCharacters implements TaskDef<@NonNull ResourcePath, @NonN
         try {
             final ReadableResource file = context.require(input, new ModifiedResourceStamper<@NonNull ReadableResource>());
             try(InputStream inputStream = file.openRead()) {
+                int lineCount = 0;
+                int lineCountExcludingLayout = 0;
+                boolean lineHasRegularCharacters = false;
                 int charCount = 0;
                 int charCountExcludingLayout = 0;
                 ParseState parseState = ParseState.REGULAR;
@@ -38,8 +41,18 @@ public class CountFileCharacters implements TaskDef<@NonNull ResourcePath, @NonN
                 int chr;
                 while((chr = inputStream.read()) != -1) {
                     charCount++;
+                    if (chr == '\n') {
+                        lineCount++;
+                        if (lineHasRegularCharacters) {
+                            lineCountExcludingLayout++;
+                            lineHasRegularCharacters = false;
+                        }
+                    }
                     switch (parseState) {
                         case REGULAR:
+                            if (isLayoutChar(chr)) {
+                                lineHasRegularCharacters = true;
+                            }
                             if (!isLayoutChar(chr) || !isLayoutChar(prevChar)) {
                                 charCountExcludingLayout++;
                             }
@@ -61,6 +74,7 @@ public class CountFileCharacters implements TaskDef<@NonNull ResourcePath, @NonN
                             break;
                         case STRING:
                             charCountExcludingLayout++;
+                            lineHasRegularCharacters = true;
                             if (chr == '"' && prevChar != '\\') {
                                 parseState = ParseState.REGULAR;
                             }
@@ -77,7 +91,7 @@ public class CountFileCharacters implements TaskDef<@NonNull ResourcePath, @NonN
                     }
                     prevChar = chr;
                 }
-                return Result.ofOk(new FileCounts(charCount, charCountExcludingLayout));
+                return Result.ofOk(new FileCounts(lineCount, lineCountExcludingLayout, charCount, charCountExcludingLayout));
             }
         } catch(IOException | IllegalArgumentException e) {
             return Result.ofErr(e);

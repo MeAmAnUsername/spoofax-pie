@@ -11,6 +11,18 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Counts the lines and characters of a file, both including and excluding layout
+ * Lines including layout count all lines of the file, which is the number of
+ * newline characters+1.
+ * Lines excluding layout do not count empty lines. A trailing newline is
+ * counted if the last character on the line before it is not layout.
+ * Characters including layout counts all characters of the file, including
+ * trailing newlines.
+ * Characters excluding newlines counts consecutive layout (whitespace and
+ * comments) as a single character. A trailing newline is counted if the last
+ * character on the preceding line is not layout.
+ */
 public class CountFileLinesAndCharacters implements TaskDef<@NonNull ResourcePath, @NonNull Result<FileCounts, @NonNull Exception>> {
     private enum ParseState {
         REGULAR,

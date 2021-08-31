@@ -24,19 +24,19 @@ public class CountFileLinesAndCharactersTest {
 
     @Test
     public void commentOnly() throws IOException {
-        String exampleCode = "// comment";
-        final InputStream stream = new ByteArrayInputStream(exampleCode.getBytes());
-        final FileCounts actual = new CountFileLinesAndCharacters().evaluateFile(stream);
-        final FileCounts expected = new FileCounts(1, 0, exampleCode.length(), 0);
-        assertEquals(expected, actual);
+        testFromString("// comment", 0, 0);
     }
 
     @Test
     public void textBetweenComments() throws IOException {
-        String exampleCode = "/* hello */ text // world";
-        final InputStream stream = new ByteArrayInputStream(exampleCode.getBytes());
+        testFromString("/* hello */ text // world", 1, 5);
+    }
+
+    public void testFromString(String program, int linesExcludingLayout, int charactersExcludingLayout) throws IOException {
+        final int linesIncludingLayout = (int) (program.chars().filter(chr -> chr == '\n').count()) + 1;
+        final FileCounts expected = new FileCounts(linesIncludingLayout, linesExcludingLayout, program.length(), charactersExcludingLayout);
+        final InputStream stream = new ByteArrayInputStream(program.getBytes());
         final FileCounts actual = new CountFileLinesAndCharacters().evaluateFile(stream);
-        final FileCounts expected = new FileCounts(1, 1, exampleCode.length(), 5);
         assertEquals(expected, actual);
     }
 

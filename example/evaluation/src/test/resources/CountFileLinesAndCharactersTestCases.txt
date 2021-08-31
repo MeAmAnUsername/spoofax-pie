@@ -1,0 +1,4 @@
+test name | linesExcludingLayout | charactersExcludingLayout | program
+
+commentOnly         | 0 | 0 | // comment
+textBetweenComments | 1 | 5 | /* hello */ text // world

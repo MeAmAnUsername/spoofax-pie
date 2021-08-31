@@ -3,7 +3,6 @@ package pl.thesis.evaluation.tasks;
 import mb.common.result.Result;
 import mb.resource.fs.FSPath;
 import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import pl.thesis.evaluation.Main;
 
@@ -22,15 +21,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CountFileLinesAndCharactersTest {
     public final Path RESOURCES_DIR = Paths.get("src", "test", "resources");
     public final Path E2E_PROJECTS_DIR = RESOURCES_DIR.resolve("e2e-projects");
+    public final Path UNIT_TESTS_FILE = RESOURCES_DIR.resolve("CountFileLinesAndCharactersTestCases.txt");
 
-    @Test
-    public void commentOnly() throws IOException {
-        testFromString("// comment", 0, 0);
+    @TestFactory
+    public Stream<DynamicTest> readUnitTests() throws IOException {
+        return Files.lines(UNIT_TESTS_FILE)
+            .skip(1) // skip the header
+            .filter(str -> !"".equals(str))
+            .map(this::parseLine);
     }
 
-    @Test
-    public void textBetweenComments() throws IOException {
-        testFromString("/* hello */ text // world", 1, 5);
+    private DynamicTest parseLine(String s) {
+        final String[] split = s.split(" \\| ", 4);
+        String testName = split[0].trim();
+        int linesExcludingLayout = Integer.parseInt(split[1].trim());
+        int charsExcludingLayout = Integer.parseInt(split[2].trim());
+        String program = split[3]; // not trimmed
+        return DynamicTest.dynamicTest(testName, () -> testFromString(program, linesExcludingLayout, charsExcludingLayout));
     }
 
     public void testFromString(String program, int linesExcludingLayout, int charactersExcludingLayout) throws IOException {

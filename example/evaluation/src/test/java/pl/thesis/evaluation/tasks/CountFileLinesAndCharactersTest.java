@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import pl.thesis.evaluation.Main;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,6 +21,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CountFileLinesAndCharactersTest {
     public final Path CASES_DIR = Paths.get("src", "test", "resources");
+
+    @Test
+    public void commentOnly() throws IOException {
+        String exampleCode = "// comment";
+        final InputStream stream = new ByteArrayInputStream(exampleCode.getBytes());
+        final FileCounts actual = new CountFileLinesAndCharacters().evaluateFile(stream);
+        final FileCounts expected = new FileCounts(1, 0, exampleCode.length(), 0);
+        assertEquals(expected, actual);
+    }
 
     @TestFactory
     public Stream<DynamicTest> createTests() throws IOException {

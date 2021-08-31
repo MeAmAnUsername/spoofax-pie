@@ -43,7 +43,7 @@ public class CountFileLinesAndCharacters implements TaskDef<@NonNull ResourcePat
         try {
             final ReadableResource file = context.require(input, new ModifiedResourceStamper<@NonNull ReadableResource>());
             try(InputStream inputStream = file.openRead()) {
-                int lineCount = 0;
+                int lineCount = 1;
                 int lineCountExcludingLayout = 0;
                 boolean lineHasRegularCharacters = false;
                 int charCount = 0;

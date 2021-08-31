@@ -1,5 +1,6 @@
 plugins {
-  id("org.metaborg.gradle.config.java-application")
+  id("org.metaborg.gradle.config.java-library")
+  id("org.metaborg.gradle.config.junit-testing")
 }
 
 val pieVersion = "15.0.0"

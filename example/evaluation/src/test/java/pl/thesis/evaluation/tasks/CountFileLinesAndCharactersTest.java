@@ -20,7 +20,8 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CountFileLinesAndCharactersTest {
-    public final Path CASES_DIR = Paths.get("src", "test", "resources");
+    public final Path RESOURCES_DIR = Paths.get("src", "test", "resources");
+    public final Path E2E_PROJECTS_DIR = RESOURCES_DIR.resolve("e2e-projects");
 
     @Test
     public void commentOnly() throws IOException {
@@ -43,7 +44,7 @@ public class CountFileLinesAndCharactersTest {
     @TestFactory
     public Stream<DynamicTest> createTests() throws IOException {
         return DynamicTest.stream(
-            Files.list(CASES_DIR),
+            Files.list(E2E_PROJECTS_DIR),
             dir -> dir.getName(dir.getNameCount() - 1).toString(),
             this::evaluateTest
         );

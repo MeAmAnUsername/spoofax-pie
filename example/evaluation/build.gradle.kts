@@ -23,3 +23,10 @@ task<JavaExec>("evaluate") {
 task("buildAndEvaluate") {
   dependsOn("build", "evaluate")
 }
+
+tasks.withType<Test> {
+  this.testLogging {
+    outputs.upToDateWhen {false}
+    this.showStandardStreams = true
+  }
+}

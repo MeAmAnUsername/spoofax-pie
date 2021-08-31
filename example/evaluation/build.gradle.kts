@@ -19,3 +19,7 @@ task<JavaExec>("evaluate") {
   classpath = sourceSets["main"].runtimeClasspath
   main = "pl.thesis.evaluation.Main"
 }
+
+task("buildAndEvaluate") {
+  dependsOn("build", "evaluate")
+}

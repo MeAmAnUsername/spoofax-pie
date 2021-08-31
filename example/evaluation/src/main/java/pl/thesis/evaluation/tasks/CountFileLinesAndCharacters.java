@@ -28,7 +28,17 @@ public class CountFileLinesAndCharacters implements TaskDef<@NonNull ResourcePat
         REGULAR,
         STRING,
         SINGLE_LINE_COMMENT,
-        MULTI_LINE_COMMENT
+        MULTI_LINE_COMMENT;
+
+        public boolean isComment() {
+            return this == SINGLE_LINE_COMMENT || this == MULTI_LINE_COMMENT;
+        }
+    }
+
+    private enum OptionalBoolean {
+        FALSE,
+        MAYBE,
+        TRUE
     }
 
     @Override
@@ -45,63 +55,88 @@ public class CountFileLinesAndCharacters implements TaskDef<@NonNull ResourcePat
             try(InputStream inputStream = file.openRead()) {
                 int lineCount = 1;
                 int lineCountExcludingLayout = 0;
-                boolean lineHasRegularCharacters = false;
+                OptionalBoolean lineHasRegularCharacters = OptionalBoolean.FALSE;
                 int charCount = 0;
                 int charCountExcludingLayout = 0;
                 ParseState parseState = ParseState.REGULAR;
                 int prevChar = 'a';
+                ParseState previousParseState = ParseState.REGULAR;
                 int chr;
                 while((chr = inputStream.read()) != -1) {
                     charCount++;
-                    if (chr == '\n') {
-                        lineCount++;
-                        if (lineHasRegularCharacters) {
-                            lineCountExcludingLayout++;
-                            lineHasRegularCharacters = false;
-                        }
-                    }
+                    final ParseState curState = parseState;
                     switch (parseState) {
                         case REGULAR:
-                            if (isLayoutChar(chr)) {
-                                lineHasRegularCharacters = true;
-                            }
-                            if (!isLayoutChar(chr) || !isLayoutChar(prevChar)) {
-                                charCountExcludingLayout++;
-                            }
                             switch (chr) {
                                 case '"':
+                                    charCountExcludingLayout++;
+                                    lineHasRegularCharacters = OptionalBoolean.TRUE;
                                     parseState = ParseState.STRING;
                                     break;
                                 case '/':
                                     if (prevChar == '/') {
+                                        // decrement because previous '/' is layout
+                                        charCountExcludingLayout--;
                                         parseState = ParseState.SINGLE_LINE_COMMENT;
+                                    } else {
+                                        // increment in case this is not the start of a comment
+                                        charCountExcludingLayout++;
+                                        if (lineHasRegularCharacters == OptionalBoolean.FALSE) {
+                                            lineHasRegularCharacters = OptionalBoolean.MAYBE;
+                                        }
                                     }
                                     break;
                                 case '*':
                                     if (prevChar == '/') {
+                                        // decrement because previous '/' is layout
+                                        charCountExcludingLayout--;
                                         parseState = ParseState.MULTI_LINE_COMMENT;
                                     }
                                     break;
+                                default:
+                                    if (!isLayoutChar(chr) || (!isLayoutChar(prevChar) && !previousParseState.isComment())) {
+                                        charCountExcludingLayout++;
+                                        lineHasRegularCharacters = OptionalBoolean.TRUE;
+                                    } else if (lineHasRegularCharacters == OptionalBoolean.MAYBE) {
+                                        lineHasRegularCharacters = OptionalBoolean.TRUE;
+                                    }
                             }
                             break;
                         case STRING:
                             charCountExcludingLayout++;
-                            lineHasRegularCharacters = true;
+                            lineHasRegularCharacters = OptionalBoolean.TRUE;
                             if (chr == '"' && prevChar != '\\') {
                                 parseState = ParseState.REGULAR;
                             }
                             break;
                         case SINGLE_LINE_COMMENT:
                             if (chr == '\n') {
+                                if (lineHasRegularCharacters == OptionalBoolean.MAYBE) {
+                                    lineHasRegularCharacters = OptionalBoolean.FALSE;
+                                }
                                 parseState = ParseState.REGULAR;
                             }
                             break;
                         case MULTI_LINE_COMMENT:
                             if (prevChar == '*' && chr == '/') {
+                                if (lineHasRegularCharacters == OptionalBoolean.MAYBE) {
+                                    lineHasRegularCharacters = OptionalBoolean.FALSE;
+                                }
                                 parseState = ParseState.REGULAR;
                             }
                     }
+                    if (chr == '\n') {
+                        lineCount++;
+                        if (lineHasRegularCharacters == OptionalBoolean.TRUE) {
+                            lineCountExcludingLayout++;
+                        }
+                        lineHasRegularCharacters = OptionalBoolean.FALSE;
+                    }
                     prevChar = chr;
+                    previousParseState = curState;
+                }
+                if (lineHasRegularCharacters == OptionalBoolean.TRUE) {
+                    lineCountExcludingLayout++;
                 }
                 return Result.ofOk(new FileCounts(lineCount, lineCountExcludingLayout, charCount, charCountExcludingLayout));
             }

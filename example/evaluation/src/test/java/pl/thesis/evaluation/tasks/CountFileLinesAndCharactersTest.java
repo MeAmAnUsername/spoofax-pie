@@ -31,7 +31,7 @@ public class CountFileLinesAndCharactersTest {
 
     private void evaluateTest(Path dir) throws Exception {
         Properties props = new Properties();
-        final Path propFile = dir.resolve("Empty.properties");
+        final Path propFile = dir.resolve("testCase.properties");
         props.load(new FileInputStream(propFile.toFile()));
         FileCounts expected = new FileCounts(
             getIntProperty(props, "lines"),

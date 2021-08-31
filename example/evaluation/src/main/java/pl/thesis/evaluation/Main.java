@@ -17,6 +17,12 @@ import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
+        FSPath dir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.spoofax", "src", "main"));
+        final Result<@NonNull ProjectEvaluationResult, @NonNull Exception> evaluationResult = evaluateProject(dir);
+        System.out.println("Done: " + evaluationResult);
+    }
+
+    public static Result<@NonNull ProjectEvaluationResult, @NonNull Exception> evaluateProject(FSPath dir) {
         CountFileLinesAndCharacters countFileLinesAndCharacters = new CountFileLinesAndCharacters();
         CountLinesAndCharacters countLinesAndCharacters = new CountLinesAndCharacters(countFileLinesAndCharacters);
         EvaluateProject main = new EvaluateProject(countLinesAndCharacters);
@@ -26,11 +32,9 @@ public class Main {
             .build();
 
         try(MixedSession session = pie.newSession()) {
-            FSPath srcDir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.spoofax", "src", "main"));
-            Result<@NonNull ProjectEvaluationResult, @NonNull Exception> res = session.require(main.createTask(srcDir));
-            System.out.println("Done: " + res);
+            return session.require(main.createTask(dir));
         } catch(ExecException | InterruptedException e) {
-            e.printStackTrace();
+            return Result.ofErr(e);
         }
     }
 }

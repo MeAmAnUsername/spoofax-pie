@@ -31,6 +31,15 @@ public class CountFileLinesAndCharactersTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void textBetweenComments() throws IOException {
+        String exampleCode = "/* hello */ text // world";
+        final InputStream stream = new ByteArrayInputStream(exampleCode.getBytes());
+        final FileCounts actual = new CountFileLinesAndCharacters().evaluateFile(stream);
+        final FileCounts expected = new FileCounts(1, 1, exampleCode.length(), 5);
+        assertEquals(expected, actual);
+    }
+
     @TestFactory
     public Stream<DynamicTest> createTests() throws IOException {
         return DynamicTest.stream(

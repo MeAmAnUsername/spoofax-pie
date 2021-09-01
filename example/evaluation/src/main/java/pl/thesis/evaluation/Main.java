@@ -10,7 +10,10 @@ import mb.resource.fs.FSPath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import pl.thesis.evaluation.tasks.CountLinesAndCharacters;
 import pl.thesis.evaluation.tasks.CountFileLinesAndCharacters;
+import pl.thesis.evaluation.tasks.CountTaskDefs;
+import pl.thesis.evaluation.tasks.CountTasks;
 import pl.thesis.evaluation.tasks.EvaluateProject;
+import pl.thesis.evaluation.tasks.IsTaskDef;
 import pl.thesis.evaluation.tasks.ProjectEvaluationResult;
 
 import java.nio.file.Paths;
@@ -25,10 +28,19 @@ public class Main {
     public static Result<@NonNull ProjectEvaluationResult, @NonNull Exception> evaluateProject(FSPath dir) {
         CountFileLinesAndCharacters countFileLinesAndCharacters = new CountFileLinesAndCharacters();
         CountLinesAndCharacters countLinesAndCharacters = new CountLinesAndCharacters(countFileLinesAndCharacters);
-        EvaluateProject main = new EvaluateProject(countLinesAndCharacters);
+        IsTaskDef isTaskDef = new IsTaskDef();
+        CountTaskDefs countTaskDefs = new CountTaskDefs(isTaskDef);
+        CountTasks countTasks = new CountTasks(countTaskDefs);
+        EvaluateProject main = new EvaluateProject(countLinesAndCharacters, countTasks);
 
         Pie pie = new PieBuilderImpl()
-            .addTaskDefs(new MapTaskDefs(countFileLinesAndCharacters, countLinesAndCharacters, main))
+            .addTaskDefs(new MapTaskDefs(
+                countFileLinesAndCharacters,
+                countLinesAndCharacters,
+                isTaskDef,
+                countTaskDefs,
+                countTasks,
+                main))
             .build();
 
         try(MixedSession session = pie.newSession()) {

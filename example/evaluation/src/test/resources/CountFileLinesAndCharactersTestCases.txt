@@ -9,3 +9,5 @@ consecutive comments 2      | 0 |  1 | /* test */// test
 empty multi-line comment    | 0 |  1 | /**/
 comment between text        | 1 |  5 | 1 +/* swurp */2
 comment marker in string    | 1 | 16 | "Hello // world"
+comment marker in string 2  | 1 | 16 | "Hello /* world"
+No layout before comment    | 1 |  2 | o//o

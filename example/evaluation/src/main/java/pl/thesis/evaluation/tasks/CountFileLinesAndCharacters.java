@@ -20,25 +20,16 @@ import java.io.InputStream;
  * Characters including layout counts all characters of the file, including
  * trailing newlines.
  * Characters excluding newlines counts consecutive layout (whitespace and
- * comments) as a single character. A trailing newline is counted if the last
- * character on the preceding line is not layout.
+ * comments) as a single character. Leading and trailing layout is counted.
  */
 public class CountFileLinesAndCharacters implements TaskDef<@NonNull ResourcePath, @NonNull Result<FileCounts, @NonNull Exception>> {
     private enum ParseState {
         REGULAR,
         STRING,
+        COMMENT_START, // found a '/', check for '/' or '*'
         SINGLE_LINE_COMMENT,
-        MULTI_LINE_COMMENT;
-
-        public boolean isComment() {
-            return this == SINGLE_LINE_COMMENT || this == MULTI_LINE_COMMENT;
-        }
-    }
-
-    private enum OptionalBoolean {
-        FALSE,
-        MAYBE,
-        TRUE
+        MULTI_LINE_COMMENT,
+        COMMENT_END // found a '*', check for '/'
     }
 
     @Override
@@ -64,87 +55,94 @@ public class CountFileLinesAndCharacters implements TaskDef<@NonNull ResourcePat
     public FileCounts evaluateFile(InputStream stream) throws IOException {
         int lineCount = 1;
         int lineCountExcludingLayout = 0;
-        OptionalBoolean lineHasRegularCharacters = OptionalBoolean.FALSE;
         int charCount = 0;
         int charCountExcludingLayout = 0;
+
         ParseState parseState = ParseState.REGULAR;
-        int prevChar = 'a';
-        ParseState previousParseState = ParseState.REGULAR;
+        boolean lineHasRegularCharacters = false;
+        boolean prevCharWasLayout = false;
+        int prevChar = -1;
+
         int chr;
         while((chr = stream.read()) != -1) {
             charCount++;
-            final ParseState curState = parseState;
             switch(parseState) {
                 case REGULAR:
                     switch(chr) {
                         case '"':
                             charCountExcludingLayout++;
-                            lineHasRegularCharacters = OptionalBoolean.TRUE;
+                            lineHasRegularCharacters = true;
+                            prevCharWasLayout = false;
                             parseState = ParseState.STRING;
                             break;
                         case '/':
-                            if(prevChar == '/') {
-                                // decrement because previous '/' is layout
-                                charCountExcludingLayout--;
-                                parseState = ParseState.SINGLE_LINE_COMMENT;
-                            } else {
-                                // increment in case this is not the start of a comment
-                                charCountExcludingLayout++;
-                                if(lineHasRegularCharacters == OptionalBoolean.FALSE) {
-                                    lineHasRegularCharacters = OptionalBoolean.MAYBE;
-                                }
-                            }
-                            break;
-                        case '*':
-                            if(prevChar == '/') {
-                                // decrement because previous '/' is layout
-                                charCountExcludingLayout--;
-                                parseState = ParseState.MULTI_LINE_COMMENT;
-                            }
+                            charCountExcludingLayout++; // eagerly increment
+                            // do not update prevCharWasLayout, used in COMMENT_START
+                            parseState = ParseState.COMMENT_START;
                             break;
                         default:
-                            if(!isLayoutChar(chr) || (!isLayoutChar(prevChar) && !previousParseState.isComment())) {
+                            if(!isLayoutChar(chr)) {
                                 charCountExcludingLayout++;
-                                lineHasRegularCharacters = OptionalBoolean.TRUE;
-                            } else if(lineHasRegularCharacters == OptionalBoolean.MAYBE) {
-                                lineHasRegularCharacters = OptionalBoolean.TRUE;
+                                lineHasRegularCharacters = true;
+                                prevCharWasLayout = false;
+                            } else if(!prevCharWasLayout) {
+                                charCountExcludingLayout++;
                             }
                     }
                     break;
                 case STRING:
                     charCountExcludingLayout++;
-                    lineHasRegularCharacters = OptionalBoolean.TRUE;
+                    lineHasRegularCharacters = true;
+                    prevCharWasLayout = false;
                     if(chr == '"' && prevChar != '\\') {
                         parseState = ParseState.REGULAR;
                     }
                     break;
+                case COMMENT_START:
+                    boolean chrIsSlash = chr == '/';
+                    if(chrIsSlash || chr == '*') {
+                        charCountExcludingLayout--; // first '/' was erroneously counted
+                        prevCharWasLayout = true;
+                        if (chrIsSlash) {
+                            parseState = ParseState.SINGLE_LINE_COMMENT;
+                        } else {
+                            parseState = ParseState.MULTI_LINE_COMMENT;
+                        }
+                    } else {
+                        lineHasRegularCharacters = true;
+                        prevCharWasLayout = isLayoutChar(chr);
+                        parseState = ParseState.REGULAR;
+                    }
                 case SINGLE_LINE_COMMENT:
                     if(chr == '\n') {
-                        if(lineHasRegularCharacters == OptionalBoolean.MAYBE) {
-                            lineHasRegularCharacters = OptionalBoolean.FALSE;
-                        }
+                        prevCharWasLayout = true;
                         parseState = ParseState.REGULAR;
                     }
                     break;
                 case MULTI_LINE_COMMENT:
-                    if(prevChar == '*' && chr == '/') {
-                        if(lineHasRegularCharacters == OptionalBoolean.MAYBE) {
-                            lineHasRegularCharacters = OptionalBoolean.FALSE;
-                        }
+                    if(chr == '*') {
+                        parseState = ParseState.COMMENT_END;
+                    }
+                    break;
+                case COMMENT_END:
+                    if (chr == '/') {
                         parseState = ParseState.REGULAR;
                     }
+                    break;
+                default:
+                    throw new IllegalStateException(String.format("Parse state %s is not handled", parseState));
             }
             if(chr == '\n') {
                 lineCount++;
-                if(lineHasRegularCharacters == OptionalBoolean.TRUE) {
+                if(lineHasRegularCharacters) {
                     lineCountExcludingLayout++;
                 }
-                lineHasRegularCharacters = OptionalBoolean.FALSE;
+                lineHasRegularCharacters = false;
+                prevCharWasLayout = true;
             }
             prevChar = chr;
-            previousParseState = curState;
         }
-        if(lineHasRegularCharacters == OptionalBoolean.TRUE) {
+        if(lineHasRegularCharacters) {
             lineCountExcludingLayout++;
         }
         return new FileCounts(lineCount, lineCountExcludingLayout, charCount, charCountExcludingLayout);

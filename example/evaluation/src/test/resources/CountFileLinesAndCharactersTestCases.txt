@@ -1,4 +1,6 @@
 test name | linesExcludingLayout | charactersExcludingLayout | program
 
-single line comment   | 0 | 0 | // comment
-text between comments | 1 | 5 | /* hello */ text // world
+single line comment     | 0 | 0 | // comment
+text between comments   | 1 | 5 | /* hello */ text // world
+layout between comments | 0 | 0 | /* hey */    // earth
+consecutive comments    | 0 | 0 | /* test *//* test */

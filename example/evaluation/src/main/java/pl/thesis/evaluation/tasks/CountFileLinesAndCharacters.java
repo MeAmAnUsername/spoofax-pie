@@ -100,7 +100,9 @@ public class CountFileLinesAndCharacters implements TaskDef<@NonNull ResourcePat
                 case COMMENT_START:
                     boolean chrIsSlash = chr == '/';
                     if(chrIsSlash || chr == '*') {
-                        charCountExcludingLayout--; // first '/' was erroneously counted
+                        if (prevCharWasLayout) {
+                            charCountExcludingLayout--; // first '/' was erroneously counted
+                        }
                         prevCharWasLayout = true;
                         if (chrIsSlash) {
                             parseState = ParseState.SINGLE_LINE_COMMENT;

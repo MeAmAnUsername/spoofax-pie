@@ -81,13 +81,12 @@ public class CountFileLinesAndCharacters implements TaskDef<@NonNull ResourcePat
                             parseState = ParseState.COMMENT_START;
                             break;
                         default:
-                            if(!isLayoutChar(chr)) {
+                            boolean isLayout = isLayoutChar(chr);
+                            if(!isLayout || !prevCharWasLayout) {
                                 charCountExcludingLayout++;
                                 lineHasRegularCharacters = true;
-                                prevCharWasLayout = false;
-                            } else if(!prevCharWasLayout) {
-                                charCountExcludingLayout++;
                             }
+                            prevCharWasLayout = isLayout;
                     }
                     break;
                 case STRING:
@@ -109,6 +108,7 @@ public class CountFileLinesAndCharacters implements TaskDef<@NonNull ResourcePat
                             parseState = ParseState.MULTI_LINE_COMMENT;
                         }
                     } else {
+                        charCountExcludingLayout++;
                         lineHasRegularCharacters = true;
                         prevCharWasLayout = isLayoutChar(chr);
                         parseState = ParseState.REGULAR;

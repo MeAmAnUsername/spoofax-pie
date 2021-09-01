@@ -1,6 +1,8 @@
 test name | linesExcludingLayout | charactersExcludingLayout | program
 
-single line comment     | 0 | 0 | // comment
-text between comments   | 1 | 5 | /* hello */ text // world
-layout between comments | 0 | 0 | /* hey */    // earth
-consecutive comments    | 0 | 0 | /* test *//* test */
+single-line comment         | 0 | 0  | // comment
+text between comments       | 1 | 5  | /* hello */ text // world
+layout between comments     | 0 | 0  | /* hey */    // earth
+consecutive comments        | 0 | 0  | /* test *//* test */
+consecutive comments 2      | 0 | 0  | /* test */// test
+/ after multi-line comment  | 1 | 10 | 2 == 8 /* test *// 4

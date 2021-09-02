@@ -11,7 +11,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import pl.thesis.evaluation.tasks.CountLinesAndCharacters;
 import pl.thesis.evaluation.tasks.CountFileLinesAndCharacters;
 import pl.thesis.evaluation.tasks.CountPieFileTasks;
+import pl.thesis.evaluation.tasks.CountPieFileTasksWithHelperFunction;
 import pl.thesis.evaluation.tasks.CountPieTasks;
+import pl.thesis.evaluation.tasks.CountPieTasksWithHelperFunction;
 import pl.thesis.evaluation.tasks.CountTaskDefs;
 import pl.thesis.evaluation.tasks.CountTasks;
 import pl.thesis.evaluation.tasks.EvaluateProject;
@@ -34,7 +36,11 @@ public class Main {
         CountTaskDefs countTaskDefs = new CountTaskDefs(isTaskDef);
         CountPieFileTasks countPieFileTasks = new CountPieFileTasks();
         CountPieTasks countPieTasks = new CountPieTasks(countPieFileTasks);
-        CountTasks countTasks = new CountTasks(countTaskDefs, countPieTasks);
+        CountPieFileTasksWithHelperFunction countPieFileTasksWithHelperFunction =
+            new CountPieFileTasksWithHelperFunction();
+        CountPieTasksWithHelperFunction countPieTasksWithHelperFunction =
+            new CountPieTasksWithHelperFunction(countPieFileTasksWithHelperFunction);
+        CountTasks countTasks = new CountTasks(countTaskDefs, countPieTasks, countPieTasksWithHelperFunction);
         EvaluateProject main = new EvaluateProject(countLinesAndCharacters, countTasks);
 
         Pie pie = new PieBuilderImpl()
@@ -46,6 +52,8 @@ public class Main {
                 countTasks,
                 countPieFileTasks,
                 countPieTasks,
+                countPieFileTasksWithHelperFunction,
+                countPieTasksWithHelperFunction,
                 main))
             .build();
 

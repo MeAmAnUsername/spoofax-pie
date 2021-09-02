@@ -11,10 +11,12 @@ import java.io.IOException;
 public class CountTasks implements TaskDef<@NonNull ResourcePath, @NonNull Result<@NonNull TaskCounts, @NonNull IOException>> {
     @NonNull private final CountTaskDefs countTaskDefs;
     @NonNull private final CountPieTasks countPieTasks;
+    @NonNull private final CountPieTasksWithHelperFunction countPieTasksWithHelperFunction;
 
-    public CountTasks(@NonNull CountTaskDefs countTaskDefs, @NonNull CountPieTasks countPieTasks) {
+    public CountTasks(@NonNull CountTaskDefs countTaskDefs, @NonNull CountPieTasks countPieTasks, @NonNull CountPieTasksWithHelperFunction countPieTasksWithHelperFunction) {
         this.countTaskDefs = countTaskDefs;
         this.countPieTasks = countPieTasks;
+        this.countPieTasksWithHelperFunction = countPieTasksWithHelperFunction;
     }
 
     @Override
@@ -35,8 +37,14 @@ public class CountTasks implements TaskDef<@NonNull ResourcePath, @NonNull Resul
             //noinspection ConstantConditions  safe because isErr returned true
             return Result.ofErr(pieTasks.getErr());
         }
+        final Result<@NonNull Integer, @NonNull IOException> pieTasksWithHelperFunction =
+            context.require(countPieTasksWithHelperFunction.createTask(input));
+        if (pieTasksWithHelperFunction.isErr()) {
+            //noinspection ConstantConditions  safe because isErr returned true
+            return Result.ofErr(pieTasksWithHelperFunction.getErr());
+        }
 
         //noinspection ConstantConditions  safe because isErr returned false
-        return Result.ofOk(new TaskCounts(javaTasks.get(), pieTasks.get()));
+        return Result.ofOk(new TaskCounts(javaTasks.get(), pieTasks.get(), pieTasksWithHelperFunction.get()));
     }
 }

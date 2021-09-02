@@ -5,6 +5,7 @@ import mb.pie.api.ExecException;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
+import mb.pie.api.TaskDefs;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.fs.FSPath;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -30,6 +31,23 @@ public class Main {
     }
 
     public static Result<@NonNull ProjectEvaluationResult, @NonNull Exception> evaluateProject(FSPath dir) {
+        TaskDefs taskDefs = buildTaskDefs();
+        Pie pie = new PieBuilderImpl()
+            .addTaskDefs(taskDefs)
+            .build();
+        EvaluateProject main = (EvaluateProject) taskDefs.getTaskDef("EvaluateProject");
+        if (main == null) {
+            return Result.ofErr(new NullPointerException("Expected a taskdef EvaluateProject to exist"));
+        }
+
+        try(MixedSession session = pie.newSession()) {
+            return session.require(main.createTask(dir));
+        } catch(ExecException | InterruptedException | NullPointerException e) {
+            return Result.ofErr(e);
+        }
+    }
+
+    public static TaskDefs buildTaskDefs() {
         CountFileLinesAndCharacters countFileLinesAndCharacters = new CountFileLinesAndCharacters();
         CountLinesAndCharacters countLinesAndCharacters = new CountLinesAndCharacters(countFileLinesAndCharacters);
         IsTaskDef isTaskDef = new IsTaskDef();
@@ -43,24 +61,16 @@ public class Main {
         CountTasks countTasks = new CountTasks(countTaskDefs, countPieTasks, countPieTasksWithHelperFunction);
         EvaluateProject main = new EvaluateProject(countLinesAndCharacters, countTasks);
 
-        Pie pie = new PieBuilderImpl()
-            .addTaskDefs(new MapTaskDefs(
-                countFileLinesAndCharacters,
-                countLinesAndCharacters,
-                isTaskDef,
-                countTaskDefs,
-                countTasks,
-                countPieFileTasks,
-                countPieTasks,
-                countPieFileTasksWithHelperFunction,
-                countPieTasksWithHelperFunction,
-                main))
-            .build();
-
-        try(MixedSession session = pie.newSession()) {
-            return session.require(main.createTask(dir));
-        } catch(ExecException | InterruptedException e) {
-            return Result.ofErr(e);
-        }
+        return new MapTaskDefs(
+            countFileLinesAndCharacters,
+            countLinesAndCharacters,
+            isTaskDef,
+            countTaskDefs,
+            countTasks,
+            countPieFileTasks,
+            countPieTasks,
+            countPieFileTasksWithHelperFunction,
+            countPieTasksWithHelperFunction,
+            main);
     }
 }

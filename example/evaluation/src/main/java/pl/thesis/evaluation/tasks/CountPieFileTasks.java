@@ -20,9 +20,9 @@ public class CountPieFileTasks implements TaskDef<@NonNull Supplier<@NonNull Str
         return countTasks(context.require(input));
     }
 
-    private static int countTasks(String fileContents) {
-        // Count tasks by looking for the keyword 'func' and an equals sign, not followed by the keyword foreign
-        final String pattern = "\\Wfunc[^=]+=(?!\\W*?foreign\\W)";
+    public static int countTasks(String fileContents) {
+        // Count tasks by looking for the keyword 'func', '(' and '=', not followed by the keyword foreign
+        final String pattern = "\\Wfunc[^(]*\\([^=]+=(?!\\W*?foreign\\W)";
         final Matcher matcher = Pattern.compile(pattern).matcher(fileContents);
         int count = 0;
         while(matcher.find()) {

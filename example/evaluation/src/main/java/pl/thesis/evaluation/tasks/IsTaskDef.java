@@ -10,6 +10,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class IsTaskDef implements TaskDef<@NonNull ResourcePath, @NonNull Result<@NonNull Boolean, @NonNull IOException>> {
 
@@ -30,14 +31,7 @@ public class IsTaskDef implements TaskDef<@NonNull ResourcePath, @NonNull Result
     }
 
     public static boolean isTaskDef(String javaFile) {
-        if (javaFile.contains("implements TaskDef<")) {
-            return true;
-        }
-
-        final String extendsKeyword = "extends "; // with trailing space
-        final int extendsIndex = javaFile.indexOf(extendsKeyword) + extendsKeyword.length();
-        final int newlineIndex = javaFile.indexOf('\n', extendsIndex);
-        return extendsIndex > -1 && newlineIndex > -1 &&
-            javaFile.substring(extendsIndex, newlineIndex).matches("[a-zA-Z0-9_]+?TaskDef \\{");
+        return javaFile.contains("implements TaskDef<") ||
+            Pattern.compile("extends [a-zA-Z0-9_]+?TaskDef \\{").matcher(javaFile).find();
     }
 }

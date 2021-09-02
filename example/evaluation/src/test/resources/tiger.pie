@@ -1,0 +1,385 @@
+module spoofax3:example:tiger
+
+import mb:common:style:styleNameFromString
+import mb:common:util:createEmptyListView
+import mb:completions:common:{CompletionResult, createCompletionResult, createCompletionProposal}
+
+func completeTaskDef(astProvider: supplier<Term?>) -> CompletionResult? = {
+  val ast = astProvider.get();
+  if (ast == null)
+    return null;
+
+  createCompletionResult(listViewOf(
+    createCompletionProposal("mypackage", "description", "", "", "mypackage", styleNameFromString("meta.package")!, createEmptyListView(), false),
+    createCompletionProposal("myclass", "description", "", "T", "mypackage", styleNameFromString("meta.class")!, createEmptyListView(), false)
+  ), true);
+}
+
+
+import stdlib:common:{Result, errResult}
+import stdlib:java:Exception
+import stdlib:types:int:getMaxValue as intMax
+import mb:spoofax:common:{IStrategoTerm as Term, termToString}
+
+func listLiteralVals(
+    astSupplier: supplier<Result<Term, _ : Exception>>
+  )[runtime: StrategoRuntime] -> Result<string, _ : Exception> = {
+  val termResult = astSupplier.get();
+  if (termResult.isErr())
+    return errResult(termResult.unwrapErr());
+
+  termToString(
+    runtime.invoke("list-of-def-names", termResult.unwrap()),
+    intMax()
+  )
+}
+
+// todo: equal to listLiteralVals?
+func listDefNames(
+    astSupplier: supplier<Result<Term, _ : Exception>>
+  )[runtime: StrategoRuntime] -> Result<string, _ : Exception> = {
+  val termResult = astSupplier.get();
+  if (termResult.isErr())
+    return errResult(termResult.unwrapErr());
+
+  termToString(
+    runtime.invoke("list-of-def-names", termResult.unwrap()),
+    intMax()
+  )
+}
+
+
+import mb:common:option:{Option, emptyOption, createOption}
+import mb:common:style:Styling
+import mb:jsglr:common:JSGLRTokens
+import mb:tiger:TigerStyler
+
+func style(tokensSupplier: supplier<Option<JSGLRTokens>>)[styler: TigerStyler] -> Option<Styling> = {
+  val tokens = tokensSupplier.get();
+  if(tokens.isEmpty())
+    emptyOption<Styling>()
+  else
+    createOption<Styling>(styler.style(tokens.getValue().tokens()))
+}
+
+
+import mb:common:message:KeyedMessage
+import mb:resource:hierarchical:{ResourceKey, ResourcePath, HierarchicalResource}
+import java:util:optionalOfNullable
+import somewhere:{analyze, TigerParse}
+import stdlib:util:enumValue
+
+func check(file: ResourceKey, rootDirectoryHint: ResourcePath?)[parse: TigerParse] -> KeyedMessages = {
+  val messagesBuilder = createKeyedMessagesBuilder();
+  // todo: type is JsglrParseTaskInput.Builder (i.e. inner class), can that be represented with DSL?
+  // A probably can actually, data JsglrParseTaskInputBuilder = foreign java path.to.JsglrParseTaskInput.Builder {}
+  val parseInputBuilder = parse.inputBuilder().withFile(file).rootDirectoryHint(optionalOfNullable(rootDirectoryHint));
+  val parseMessages = parseInputBuilder.buildMessagesSupplier();
+  messagesBuilder.addMessages(file, parseMessages);
+  val analysisResult = analyze(file, parseInputBuilder.buildRecoverableAstSupplier());
+  if (analysisResult.isOk()) {
+    output = analysisResult.unwrap();
+    // todo: cannot access fields
+    messagesBuilder.addMessages(output.result.resource, output.result.messages)
+  } else {
+    messagesBuilder.addMessage("Analysis failed", analysisResult.unwrapError(), enumValue("Severity", "Error"))
+  }
+  messagesBuilder.build()
+}
+
+
+import mb:common:message:createKeyedMessagesBuilder
+import stdlib:builtin:path:getHierarchicalResource
+
+func checkAggregator(input: ResourcePath) -> KeyedMessages = {
+  val messagesBuilder = createKeyedMessagesBuilder();
+  requires input;
+  val rootDirectory = getHierarchicalResource(input);
+
+  // todo: multiple filters; filters isDirectory, isFile, hidden
+  [require dir | dir <- walk rootDirectory with isDirectory(true) and hidden(false)]
+  [{
+    val messages = check(file.getKey(), input);
+    messagesBuilder.addMessages(messages);
+  } | file <- walk rootDirectory with isFile(true) and extension "tig"]
+
+  messagesBuilder.build()
+}
+
+
+import mb:common:hierarchical:ResourcePath
+import mb:common:message:{KeyedMessage, createKeyedMessagesBuilder}
+import mb:resource:hierarchical:{ResourceKey, ResourcePath, HierarchicalResource}
+import mb:resource:hierarchical:walk:pathResourceWalker
+import mb:resource:hierarchical:match:path:{noHiddenPathMatcher, extensionPathMatcher}
+import mb:resource:hierarchical:match:{fileResourceMatcher, pathResourceMatcher}
+import somewhere:TigerParse
+import stdlib:builtin:path:getHierarchicalResource
+import stdlib:util:enumValue
+
+func checkMulti(input: ResourcePath)[parse: TigerParse] -> KeyedMessages = {
+  val messagesBuilder = createKeyedMessagesBuilder();
+  require input;
+  val rootDirectory = getHierarchicalResource(input);
+
+  // todo: multiple filters; filters isDirectory, isFile, hidden
+  [require dir | dir <- walk rootDirectory with isDirectory(true) and hidden(false)]
+  [{
+    filePath = file.getPath();
+    val messages = parse.inputBuilder().withFile(filePath).rootDirectoryHint(input).buildMessagesSupplier().get();
+    messagesBuilder.addMessages(filePath, messages);
+  } | file <- walk rootDirectory with isFile(true) and extension "tig"]
+
+  val walker = pathResourceWalker(noHiddenPathMatcher());
+  val matcher = fileResourceMatcher().and(pathResourceMatcher(extensionPathMatcher("tig")));
+  val analysisResult = analyze(input, parse.createRecoverableMultiAstSupplierFunction(walker, matcher));
+  if (analysisResult.isOk()) {
+    val output = analysisResult.unwrap();
+    messagesBuilder.addMessages(output.result.messages);
+    messagesBuilder.addMessages(output.messagesFromAstProviders)
+  } else {
+    messagesBuilder.addMessage("Project-wide analysis failed", analysisResult.unwrapErr(),
+      enumValue("Severity", "Error"), input)
+  }
+
+  messagesBuilder.build()
+}
+
+
+import mb:common:message:createKeyedMessagesBuilder
+import mb:spoofax:code:language:command:{CommandFeedback, commandFeedbackOf, showFileFeedback}
+import mb:resource:hierarchical:ResourcePath
+import java:nio:charset:StandardCharsets
+import somewhere:{TigerParse, listDefNames}
+import stdlib:util:enumValue
+
+func compileDirectory(dir: ResourcePath)[parse: TigerParse, resourceService: ResourceService] -> CommandFeedback = {
+  val directory = require dir with isFile and extension "tig"
+  val messagesBuilder = createKeyedMessagesBuilder();
+
+  val defNameStrings = [{
+    val filePath = file.getPath();
+    val defNames = listDefNames(parse.inputBuilder().withFile(filePath).buildAstSupplier());
+    if (defNames.isOk()) {
+      defNames.unwrap() + "\n"
+    } else {
+      messagesBuilder.addMessage("Listing definition names for '$file' failed", defNames.unwrapErr(),
+        enumValue("Severity", "Error"), filePath);
+      "[]\n"
+    }
+  } | file <- list directory with isFile and extension "tig"]
+
+  val str = "[\n  ${joinStrings(defNameStrings, ", ")}]";
+
+  val generatedPath = dir.appendSegment("_defnames.aterm");
+  val generatedResource = resourceService.getHierarchicalResource(generatedPath);
+  // todo: requires helper method (can't getBytes, returns byte[])
+  generatedResource.writeBytes(str.getBytes(StandardCharsets.UTF_8));
+  generates generatedResource by hash;
+
+  commandFeedbackOf(messagesBuilder.build(), showFileFeedback(generatedPath))
+}
+
+
+import mb:spoofax:code:language:command:{CommandFeedback, commandFeedbackOf,
+  commandFeedbackOfTryExtractMessagesFrom, showFileFeedback}
+import mb:resource:hierarchical:ResourcePath
+import mb:resource:ResourceService
+import java:nio:charset:StandardCharsets
+import somewhere:{TigerParse, listLiteralVals}
+import stdlib:fileSystem:writeFile
+
+func compileFile(file: ResourcePath)[parse: TigerParse, resourceService: ResourceService] -> CommandFeedback = {
+  val astSupplier = parse.inputBuilder().withFile(file).buildAstSupplier();
+  val listedLiteralVals = listLiteralVals(astSupplier);
+  if (listedLiteralVals.isOk()) {
+    val generatedPath = file.replaceLeafExtension("literals.aterm");
+    val generatedResource = resourceService.getHierarchicalResource(generatedPath);
+    writeFile(generatedResource, listedLiteralVals.unwrap(), UTF_8); // todo: helper method
+    generates generatedResource by hash;
+    commandFeedbackOf(showFileFeedback(generatedPath))
+  } else {
+    commandFeedbackOfTryExtractMessagesFrom(listedLiteralVals.unwrapErr(), file);
+  }
+}
+
+
+import mb:spoofax:code:language:command:{CommandFeedback, commandFeedbackOf,
+  commandFeedbackOfTryExtractMessagesFrom, showFileFeedback}
+import mb:resource:hierarchical:ResourcePath
+import mb:resource:ResourceService
+import java:nio:charset:StandardCharsets
+import somewhere:{TigerParse, listDefNames, listLiteralVals}
+import stdlib:fileSystem:writeFile
+
+func compileFileAlt(
+    file: resourcePath, listDefNames: bool, base64Encode: bool, compiledFileNameSuffix: string
+  )[parse: TigerParse, resourceService: ResourceService] -> CommandFeedback = {
+  val astSupplier = parse.inputBuilder().withFile(file).buildAstSupplier();
+  val strResult = if(listDefNames) listDefNames(astSupplier) else listLiteralVals(astSupplier);
+  if (strResult.isOk()) {
+    val str = if (base64Encode) {
+      // todo: requires helper method
+      Base64.getEncoder().encodeToString(strResult.unwrap().getBytes(StandardCharsets.UTF_8));
+    } else {
+      strResult.unwrap()
+    }
+    val generatedPath = file.replaceLeafExtension(compiledFileNameSuffix);
+    val generatedResource = resourceService.getHierarchicalResource(generatedPath);
+    writeFile(generatedResource, listedLiteralVals.unwrap(), UTF_8); // todo: helper method
+    generates generatedResource by hash;
+    commandFeedbackOf(showFileFeedback(generatedPath))
+  } else {
+    commandFeedbackOfTryExtractMessagesFrom(strResult.unwrapErr(), file);
+  }
+} @ file
+
+
+import mb:common:option:Option
+import mb:jsglr:common:JSGLRTokens
+import mb:resource:ResourceKey
+
+import somewhere:TigerParse
+
+func ideTokenize(key: ResourceKey)[parse: TigerParse] -> Option<JSGLRTokens> = {
+  parse.inputBuilder().withFile(key).buildTokensSupplier().get().ok()
+}
+
+
+import mb:aterm:common:TermToString
+import mb:resource:ResourceKey
+import mb:spoofax:code:language:command:{CommandFeedback, commandFeedbackOf,
+  commandFeedbackOfTryExtractMessagesFrom, showTextFeedback}
+import mb:jsglr:common:getSmallestTermEncompassingRegion
+import somewhere:{TigerParse, analyze}
+
+func showAnalyzedAst(key: ResourceKey, region: Region?)[parse: TigerParse] -> CommandFeedback = {
+  val analysis = analyze(key, parse.inputBuilder().withFile(key).buildAstSupplier());
+  if (analysis.isOk()) {
+    // todo: requires helper method to access field
+    val ast = analysis.unwrap().result.ast;
+    val astPart = if (region != null)
+      getSmallestTermEncompassingRegion(ast, region) else ast;
+    commandFeedbackOf(showTextFeedback(termToString(astPart), "Analyzed AST for '$key'"))
+  } else {
+    commandFeedbackOfTryExtractMessagesFrom(analysis.unwrapErr(), key)
+  }
+}
+
+
+package mb.tiger.spoofax.task;
+
+
+import mb:aterm:common:TermToString
+import mb:resource:ResourceKey
+import mb:stratego:common:StrategoRuntime
+import mb:spoofax:code:language:command:{CommandFeedback, commandFeedbackOf,
+  commandFeedbackOfTryExtractMessagesFrom, showTextFeedback}
+import mb:jsglr:common:getSmallestTermEncompassingRegion
+import javax:inject:Provider
+import somewhere:TigerParse
+
+func showDesugaredAst(
+    key: ResourceKey, region: Region?
+  )[parse: TigerParse, strategoRuntimeProvider: Provider<StrategoRuntime>] -> CommandFeedback = {
+  val parseResult = parse.inputBuilder().withFile(key).buildAstSupplier().get();
+  if (parseResult.isOk()) {
+    val ast = parseResult.unwrap();
+    val astPart = if (region != null)
+      getSmallestTermEncompassingRegion(ast, region) else ast;
+    // todo: may fail with exception, not caught in DSL.
+    // todo: create helper method invokeSafeStrategoRuntime which returns a Result
+    val str = termToString(strategoRuntimeProvider.get().invoke("desugar-all", ast));
+    commandFeedbackOf(showTextFeedback(str, "Desugared AST for '$key'"))
+  } else {
+    commandFeedbackOfTryExtractMessagesFrom(parseResult.unwrapErr(), key)
+  }
+}
+
+
+import mb:aterm:common:TermToString
+import mb:resource:ResourceKey
+import mb:spoofax:code:language:command:{CommandFeedback, commandFeedbackOf,
+  commandFeedbackOfTryExtractMessagesFrom, showTextFeedback}
+import mb:jsglr:common:getSmallestTermEncompassingRegion
+import somewhere:TigerParse
+
+func showParsedAst(key: ResourceKey, region: Region?)[parse: TigerParse] -> CommandFeedback = {
+  val parseResult = parse.inputBuilder().withFile(key).buildAstSupplier().get();
+  if (parseResult.isOk()) {
+    val ast = parseResult.unwrap();
+    val astPart = if (region != null)
+      getSmallestTermEncompassingRegion(ast, region) else ast;
+    commandFeedbackOf(showTextFeedback(termToString(ast), "Parsed AST for '$key'"))
+  } else {
+    commandFeedbackOfTryExtractMessagesFrom(parseResult.unwrapErr(), key)
+  }
+}
+
+import mb:aterm:common:TermToString
+import mb:resource:ResourceKey
+import mb:stratego:common:StrategoRuntime
+import mb:spoofax:code:language:command:{CommandFeedback, commandFeedbackOf,
+  commandFeedbackOfTryExtractMessagesFrom, showTextFeedback}
+import mb:jsglr:common:getSmallestTermEncompassingRegion
+import javax:inject:Provider
+import somewhere:TigerParse
+
+func showPrettyPrintedText(
+    key: ResourceKey, region: Region?
+  )[parse: TigerParse, strategoRuntimeProvider: Provider<StrategoRuntime>] -> CommandFeedback = {
+  val parseResult = parse.inputBuilder().withFile(key).buildAstSupplier().get();
+  if (parseResult.isOk()) {
+    val ast = parseResult.unwrap();
+    val astPart = if (region != null)
+      getSmallestTermEncompassingRegion(ast, region) else ast;
+    // todo: may fail with exception, not caught in DSL.
+    // todo: create helper method invokeSafeStrategoRuntime which returns a Result
+    val str = termToString(strategoRuntimeProvider.get().invoke("pp-Tiger-string", ast));
+    commandFeedbackOf(showTextFeedback(str, "Pretty-printed text for '$key'"))
+  } else {
+    commandFeedbackOfTryExtractMessagesFrom(parseResult.unwrapErr(), key)
+  }
+}
+
+
+import mb:aterm:common:termToString
+import mb:resource:ResourceKey
+import mb:stratego:common:StrategoRuntime
+import mb:spoofax:code:language:command:{CommandFeedback, commandFeedbackOf,
+  commandFeedbackOfTryExtractMessagesFrom, showTextFeedback}
+import org:spoofax:interpreter:terms:ITermFactory
+import javax:inject:Provider
+import somewhere:{TigerParse, analyze}
+
+func showPrettyPrintedText(
+    key: ResourceKey, region: Region?
+  )[parse: TigerParse, strategoRuntimeProvider: Provider<StrategoRuntime>] -> CommandFeedback = {
+  val analysis = analyze(key, parse.inputBuilder().withFile(key).buildAstSupplier());
+  if (analysis.isOk()) {
+    val output = analysis.unwrap();
+    // todo: requires helper method to access output.context
+    val runtime = strategoRuntimeProvider.get().addContextObject(output.context)
+    val termFactory = strategoRuntime.getTermFactory();
+    // todo: requires helper method to access output.result.ast
+    val inputTerm = termFactory.makeTuple(output.result.ast, termFactory.makeString(key.asString()));
+    // todo: may fail with exception, not caught in DSL.
+    // todo: create helper method invokeSafeStrategoRuntime which returns a Result
+    val str = termToString(runtime.invoke("spoofax3-editor-show-analysis-term", inputTerm));
+    commandFeedbackOf(showTextFeedback(str, "Scope graph for '$key'"))
+  } else {
+    commandFeedbackOfTryExtractMessagesFrom(parseResult.unwrapErr(), key)
+  }
+}
+
+#this example prints line count for all found files
+total=0
+find . -type f -name "*.java" | while read FILE; do
+     #you see use grep instead wc ! for properly counting
+     count=$(grep -c ^ < "$FILE")
+#     echo "$FILE has $count lines"
+     echo "$count"
+     total=$(($total+$count))
+done
+#echo TOTAL LINES COUNTED:  $total
+echo 'Copy counts to excel to sum'

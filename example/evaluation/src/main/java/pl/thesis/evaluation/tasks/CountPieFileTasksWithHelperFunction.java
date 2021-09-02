@@ -20,7 +20,7 @@ public class CountPieFileTasksWithHelperFunction implements TaskDef<@NonNull Sup
         return countTasksWithHelperFunction(context.require(input));
     }
 
-    private int countTasksWithHelperFunction(String program) {
+    public static int countTasksWithHelperFunction(String program) {
         final Matcher matcher = Pattern.compile("// uses java helper function").matcher(program);
         int count = 0;
         while (matcher.find()) {

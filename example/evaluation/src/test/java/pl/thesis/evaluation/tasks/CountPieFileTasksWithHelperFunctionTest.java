@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CountPieFileTasksTest {
+public class CountPieFileTasksWithHelperFunctionTest {
     private final Path DIR = Paths.get("src", "test", "resources", "task-counts", "pie");
 
     @TestFactory
@@ -39,8 +39,8 @@ public class CountPieFileTasksTest {
 
     private void testPieFile(Properties properties, Path file) throws IOException {
         final String program = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
-        final int actual = CountPieFileTasks.countTasks(program);
-        final int expected = Integer.parseInt(properties.getProperty(getFileNameWithoutExtension(file) + ".tasks"));
+        final int actual = CountPieFileTasksWithHelperFunction.countTasksWithHelperFunction(program);
+        final int expected = Integer.parseInt(properties.getProperty(getFileNameWithoutExtension(file) + ".tasksWithHelper"));
         assertEquals(expected, actual);
     }
 }

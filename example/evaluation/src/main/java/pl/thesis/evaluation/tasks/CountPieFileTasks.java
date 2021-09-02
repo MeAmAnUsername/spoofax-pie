@@ -22,7 +22,7 @@ public class CountPieFileTasks implements TaskDef<@NonNull Supplier<@NonNull Str
 
     public static int countTasks(String fileContents) {
         // Count tasks by looking for the keyword 'func', '(' and '=', not followed by the keyword foreign
-        final String pattern = "\\Wfunc[^(]*\\([^=]+=(?!\\W*?foreign\\W)";
+        final String pattern = "\\Wfunc\\W[^(]*\\([^=]+=(?!\\W*?foreign\\W)";
         final Matcher matcher = Pattern.compile(pattern).matcher(fileContents);
         int count = 0;
         while(matcher.find()) {

@@ -69,6 +69,7 @@ import java:util:optionalOfNullable
 import somewhere:{analyze, TigerParse}
 import stdlib:util:enumValue
 
+// uses java helper function
 func check(file: ResourceKey, rootDirectoryHint: ResourcePath?)[parse: TigerParse] -> KeyedMessages = {
   val messagesBuilder = createKeyedMessagesBuilder();
   // todo: type is JsglrParseTaskInput.Builder (i.e. inner class), can that be represented with DSL?
@@ -153,6 +154,7 @@ import java:nio:charset:StandardCharsets
 import somewhere:{TigerParse, listDefNames}
 import stdlib:util:enumValue
 
+// uses java helper function
 func compileDirectory(dir: ResourcePath)[parse: TigerParse, resourceService: ResourceService] -> CommandFeedback = {
   val directory = require dir with isFile and extension "tig"
   val messagesBuilder = createKeyedMessagesBuilder();
@@ -189,6 +191,7 @@ import java:nio:charset:StandardCharsets
 import somewhere:{TigerParse, listLiteralVals}
 import stdlib:fileSystem:writeFile
 
+// uses java helper function
 func compileFile(file: ResourcePath)[parse: TigerParse, resourceService: ResourceService] -> CommandFeedback = {
   val astSupplier = parse.inputBuilder().withFile(file).buildAstSupplier();
   val listedLiteralVals = listLiteralVals(astSupplier);
@@ -212,6 +215,7 @@ import java:nio:charset:StandardCharsets
 import somewhere:{TigerParse, listDefNames, listLiteralVals}
 import stdlib:fileSystem:writeFile
 
+// uses java helper function
 func compileFileAlt(
     file: resourcePath, listDefNames: bool, base64Encode: bool, compiledFileNameSuffix: string
   )[parse: TigerParse, resourceService: ResourceService] -> CommandFeedback = {
@@ -253,6 +257,7 @@ import mb:spoofax:code:language:command:{CommandFeedback, commandFeedbackOf,
 import mb:jsglr:common:getSmallestTermEncompassingRegion
 import somewhere:{TigerParse, analyze}
 
+// uses java helper function
 func showAnalyzedAst(key: ResourceKey, region: Region?)[parse: TigerParse] -> CommandFeedback = {
   val analysis = analyze(key, parse.inputBuilder().withFile(key).buildAstSupplier());
   if (analysis.isOk()) {
@@ -279,6 +284,7 @@ import mb:jsglr:common:getSmallestTermEncompassingRegion
 import javax:inject:Provider
 import somewhere:TigerParse
 
+// uses java helper function
 func showDesugaredAst(
     key: ResourceKey, region: Region?
   )[parse: TigerParse, strategoRuntimeProvider: Provider<StrategoRuntime>] -> CommandFeedback = {
@@ -325,6 +331,7 @@ import mb:jsglr:common:getSmallestTermEncompassingRegion
 import javax:inject:Provider
 import somewhere:TigerParse
 
+// uses java helper function
 func showPrettyPrintedText(
     key: ResourceKey, region: Region?
   )[parse: TigerParse, strategoRuntimeProvider: Provider<StrategoRuntime>] -> CommandFeedback = {
@@ -352,6 +359,7 @@ import org:spoofax:interpreter:terms:ITermFactory
 import javax:inject:Provider
 import somewhere:{TigerParse, analyze}
 
+// uses java helper function
 func showPrettyPrintedText(
     key: ResourceKey, region: Region?
   )[parse: TigerParse, strategoRuntimeProvider: Provider<StrategoRuntime>] -> CommandFeedback = {
@@ -371,15 +379,3 @@ func showPrettyPrintedText(
     commandFeedbackOfTryExtractMessagesFrom(parseResult.unwrapErr(), key)
   }
 }
-
-#this example prints line count for all found files
-total=0
-find . -type f -name "*.java" | while read FILE; do
-     #you see use grep instead wc ! for properly counting
-     count=$(grep -c ^ < "$FILE")
-#     echo "$FILE has $count lines"
-     echo "$count"
-     total=$(($total+$count))
-done
-#echo TOTAL LINES COUNTED:  $total
-echo 'Copy counts to excel to sum'

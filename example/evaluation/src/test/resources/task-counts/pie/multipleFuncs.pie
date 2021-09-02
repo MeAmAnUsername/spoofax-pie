@@ -2,5 +2,7 @@ module test:count:func:multiple
 
 func funcOne() -> Result<int, _ : Exception> = okResult(0)
 func funcTwo<E>(e: Optional<E>) -> bool = false
-func funcThree()[runtime: StrategoRuntime] -> bool = false
+
+// uses java helper function
+func funcThree()[runtime: StrategoRuntime] -> bool = funcFour() == "global"
 func funcFour() -> string = foreign java org:example:Foo#getString

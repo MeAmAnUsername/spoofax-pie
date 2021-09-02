@@ -1,0 +1,4 @@
+module test:func:withJavaHelperFunction
+
+// uses java helper function
+func foo() -> int = test:func:foreign:helper() + 6

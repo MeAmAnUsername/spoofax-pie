@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IsTaskDefTest {
-    public final Path DIR = Paths.get("src", "test", "resources", "task-counts");
+    private final Path DIR = Paths.get("src", "test", "resources", "task-counts", "java");
 
     @Test
     public void taskAIsTaskDef() throws IOException {

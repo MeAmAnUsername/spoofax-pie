@@ -1,0 +1,4 @@
+module test:count:func:foreign
+
+func external() -> unit =
+  foreign External

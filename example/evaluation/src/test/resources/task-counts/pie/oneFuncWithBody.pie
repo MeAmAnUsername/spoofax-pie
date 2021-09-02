@@ -1,0 +1,6 @@
+module test:count:func:oneWithBody
+
+func somefunc() -> bool = {
+  val func = unit;
+  val foo: int* = 8;
+}

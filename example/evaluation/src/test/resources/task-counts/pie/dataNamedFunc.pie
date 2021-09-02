@@ -1,0 +1,6 @@
+module test:count:func:data
+
+data func = foreign java Func {
+  func get() -> int
+  func set(int) -> unit
+}

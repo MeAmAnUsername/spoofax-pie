@@ -1,70 +1,46 @@
 package pl.thesis.evaluation.tasks;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Properties;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CountPieFileTasksTest {
-    private final Path TIGER_PIE_FILE = Paths.get("src", "test", "resources", "tiger.pie");
+    private final Path DIR = Paths.get("src", "test", "resources", "task-counts", "pie");
 
-    @Test
-    public void noFuncs() {
-        assertProgramHasTaskCount(0, "module test:count:func:none");
+    @TestFactory
+    public Stream<DynamicTest> testPieFiles() throws IOException {
+        Properties properties = new Properties();
+        final Path propFile = DIR.resolve("expected.properties");
+        properties.load(new FileInputStream(propFile.toFile()));
+
+        return DynamicTest.stream(
+            Files.walk(DIR)
+                .filter(Files::isRegularFile)
+                .filter(file -> file.toString().endsWith(".pie")),
+            this::getFileNameWithoutExtension,
+            file -> testPieFile(properties, file)
+        );
     }
 
-    @Test
-    public void foreignFunc() {
-        assertProgramHasTaskCount(0, "module test:count:func:foreign\n\n" +
-            "func external() -> unit =\n" +
-            "  foreign External\n");
+    private String getFileNameWithoutExtension(Path file) {
+        final String fileName = file.getFileName().toString();
+        return fileName.substring(0, fileName.lastIndexOf('.'));
     }
 
-    @Test
-    public void dataNamedFunc() {
-        assertProgramHasTaskCount(0, "module test:count:func:data\n\n" +
-            "data func = foreign java Func {\n" +
-            "  func get() -> int\n" +
-            "  func set(int) -> unit\n" +
-            "}\n");
-    }
-
-    @Test
-    public void oneFunc() {
-        assertProgramHasTaskCount(1, "module test:count:func:one\n\n" +
-            "func somefunc() -> Result<int, _ : Exception> = okResult(0)\n");
-    }
-
-    @Test
-    public void oneFuncWithBody() {
-        assertProgramHasTaskCount(1, "module test:count:func:one\n\n" +
-            "func somefunc() -> bool = {\n" +
-            "  val func = unit;\n" +
-            "  val foo: int* = 8;\n" +
-            "}\n");
-    }
-
-    @Test
-    public void multipleFuncs() {
-        assertProgramHasTaskCount(3, "module test:count:func:multiple\n\n" +
-            "func funcOne() -> Result<int, _ : Exception> = okResult(0)\n" +
-            "func funcTwo<E>(e: Optional<E>) -> bool = false\n" +
-            "func funcThree()[runtime: StrategoRuntime] -> bool = false\n" +
-            "func funcFour() -> string = foreign java org:example:Foo#getString");
-    }
-
-    @Test
-    public void tigerPieFile() throws IOException {
-        assertProgramHasTaskCount(16, new String(Files.readAllBytes(TIGER_PIE_FILE), StandardCharsets.UTF_8));
-    }
-
-    public void assertProgramHasTaskCount(int expectedTaskCount, String program) {
+    private void testPieFile(Properties properties, Path file) throws IOException {
+        final String program = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
         final int actual = CountPieFileTasks.countTasks(program);
-        assertEquals(expectedTaskCount, actual);
+        final int expected = Integer.parseInt(properties.getProperty(getFileNameWithoutExtension(file)));
+        assertEquals(expected, actual);
     }
 }

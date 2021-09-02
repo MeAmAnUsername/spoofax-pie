@@ -1,0 +1,3 @@
+module test:count:func:one
+
+func somefunc() -> Result<int, _ : Exception> = okResult(0)

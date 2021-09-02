@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CountTaskDefsTest {
-    public final Path DIR = Paths.get("src", "test", "resources", "task-counts");
+    private final Path DIR = Paths.get("src", "test", "resources", "task-counts");
 
     @Test
     public void countAll() throws Exception {

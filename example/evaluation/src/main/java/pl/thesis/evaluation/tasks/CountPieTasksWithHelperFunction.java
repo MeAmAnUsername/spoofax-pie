@@ -36,7 +36,7 @@ public class CountPieTasksWithHelperFunction implements TaskDef<@NonNull Resourc
             dir.walkForEach(ResourceMatcher.ofDirectory(), context::require);
 
             final AtomicInteger count = new AtomicInteger();
-            dir.walkForEach(ResourceMatcher.ofFileExtension("java"), file -> {
+            dir.walkForEach(ResourceMatcher.ofFileExtension("pie"), file -> {
                 final ResourceStringSupplier stringSupplier = new ResourceStringSupplier(file.getKey(),
                     new ModifiedResourceStamper<@NonNull ReadableResource>(), StandardCharsets.UTF_8);
                 count.addAndGet(context.require(countPieFileTasksWithHelperFunction.createTask(stringSupplier)));

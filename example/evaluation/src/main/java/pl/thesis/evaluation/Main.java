@@ -10,6 +10,8 @@ import mb.resource.fs.FSPath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import pl.thesis.evaluation.tasks.CountLinesAndCharacters;
 import pl.thesis.evaluation.tasks.CountFileLinesAndCharacters;
+import pl.thesis.evaluation.tasks.CountPieFileTasks;
+import pl.thesis.evaluation.tasks.CountPieTasks;
 import pl.thesis.evaluation.tasks.CountTaskDefs;
 import pl.thesis.evaluation.tasks.CountTasks;
 import pl.thesis.evaluation.tasks.EvaluateProject;
@@ -30,7 +32,9 @@ public class Main {
         CountLinesAndCharacters countLinesAndCharacters = new CountLinesAndCharacters(countFileLinesAndCharacters);
         IsTaskDef isTaskDef = new IsTaskDef();
         CountTaskDefs countTaskDefs = new CountTaskDefs(isTaskDef);
-        CountTasks countTasks = new CountTasks(countTaskDefs);
+        CountPieFileTasks countPieFileTasks = new CountPieFileTasks();
+        CountPieTasks countPieTasks = new CountPieTasks(countPieFileTasks);
+        CountTasks countTasks = new CountTasks(countTaskDefs, countPieTasks);
         EvaluateProject main = new EvaluateProject(countLinesAndCharacters, countTasks);
 
         Pie pie = new PieBuilderImpl()
@@ -40,6 +44,8 @@ public class Main {
                 isTaskDef,
                 countTaskDefs,
                 countTasks,
+                countPieFileTasks,
+                countPieTasks,
                 main))
             .build();
 

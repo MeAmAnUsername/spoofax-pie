@@ -6,6 +6,8 @@ import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.io.IOException;
+
 public class EvaluateProject implements TaskDef<@NonNull ResourcePath, @NonNull Result<@NonNull ProjectEvaluationResult, @NonNull Exception>> {
     @NonNull private final CountLinesAndCharacters countLinesAndCharacters;
     @NonNull private final CountTasks countTasks;
@@ -29,7 +31,7 @@ public class EvaluateProject implements TaskDef<@NonNull ResourcePath, @NonNull 
             //noinspection ConstantConditions  Safe because isErr() returned true
             return Result.ofErr(characterCounts.getErr());
         }
-        final Result<@NonNull TaskCounts, @NonNull Exception> taskCounts = context.require(countTasks.createTask(input));
+        final Result<@NonNull TaskCounts, @NonNull IOException> taskCounts = context.require(countTasks.createTask(input));
         if (taskCounts.isErr()) {
             //noinspection ConstantConditions  Safe because isErr() returned true
             return Result.ofErr(taskCounts.getErr());

@@ -29,7 +29,7 @@ public class IsTaskDef implements TaskDef<@NonNull ResourcePath, @NonNull Result
         }
     }
 
-    public boolean isTaskDef(String javaFile) {
+    public static boolean isTaskDef(String javaFile) {
         if (javaFile.contains("implements TaskDef<")) {
             return true;
         }

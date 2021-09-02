@@ -5,6 +5,7 @@ import mb.pie.api.ExecException;
 import mb.pie.api.MapTaskDefs;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
+import mb.pie.api.TaskDef;
 import mb.pie.api.TaskDefs;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.fs.FSPath;
@@ -35,10 +36,7 @@ public class Main {
         Pie pie = new PieBuilderImpl()
             .addTaskDefs(taskDefs)
             .build();
-        EvaluateProject main = (EvaluateProject) taskDefs.getTaskDef("EvaluateProject");
-        if (main == null) {
-            return Result.ofErr(new NullPointerException("Expected a taskdef EvaluateProject to exist"));
-        }
+        EvaluateProject main = getTaskDef(taskDefs, EvaluateProject.class);
 
         try(MixedSession session = pie.newSession()) {
             return session.require(main.createTask(dir));
@@ -72,5 +70,15 @@ public class Main {
             countPieFileTasksWithHelperFunction,
             countPieTasksWithHelperFunction,
             main);
+    }
+
+    public static <T extends TaskDef<@NonNull ?, @NonNull ?>> T getTaskDef(@NonNull TaskDefs taskDefs, Class<T> clazz) {
+        final String id = clazz.getSimpleName();
+        TaskDef<@NonNull ?, @NonNull ?> taskDef = taskDefs.getTaskDef(id);
+        if (taskDef == null) {
+            throw new NullPointerException("Could not get task '"+id+"'");
+        }
+        // noinspection unchecked  already checked if taskdef is assignable to clazz
+        return (T) taskDef;
     }
 }

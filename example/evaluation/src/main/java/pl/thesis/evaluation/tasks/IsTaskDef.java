@@ -23,19 +23,21 @@ public class IsTaskDef implements TaskDef<@NonNull ResourcePath, @NonNull Result
     public @NonNull Result<@NonNull Boolean, @NonNull IOException> exec(@NonNull ExecContext context, @NonNull ResourcePath input) {
         try {
             final ReadableResource file = context.require(input, new ModifiedResourceStamper<@NonNull ReadableResource>());
-            final String contents = file.readString(StandardCharsets.UTF_8);
-            if (contents.contains("implements TaskDef<")) {
-                return Result.ofOk(true);
-            }
-
-            final String extendsKeyword = "extends "; // with trailing space
-            final int extendsIndex = contents.indexOf(extendsKeyword) + extendsKeyword.length();
-            final int newlineIndex = contents.indexOf('\n', extendsIndex);
-            final boolean indirectlyImplements = extendsIndex > -1 && newlineIndex > -1 &&
-                contents.substring(extendsIndex, newlineIndex).matches("[a-zA-Z0-9_]+?TaskDef \\{");
-            return Result.ofOk(indirectlyImplements);
+            return Result.ofOk(isTaskDef(file.readString(StandardCharsets.UTF_8)));
         } catch(IOException e) {
             return Result.ofErr(e);
         }
+    }
+
+    public boolean isTaskDef(String javaFile) {
+        if (javaFile.contains("implements TaskDef<")) {
+            return true;
+        }
+
+        final String extendsKeyword = "extends "; // with trailing space
+        final int extendsIndex = javaFile.indexOf(extendsKeyword) + extendsKeyword.length();
+        final int newlineIndex = javaFile.indexOf('\n', extendsIndex);
+        return extendsIndex > -1 && newlineIndex > -1 &&
+            javaFile.substring(extendsIndex, newlineIndex).matches("[a-zA-Z0-9_]+?TaskDef \\{");
     }
 }

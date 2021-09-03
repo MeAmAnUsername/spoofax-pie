@@ -42,7 +42,7 @@ public class E2eTest {
         );
 
         @SuppressWarnings("NullableProblems") // Cannot find NonNull and error isn't used anyway, so just ignore
-        Result<EvaluationResult, ?> result = Main.evaluateProject(new FSPath(dir));
+        Result<EvaluationResult, ?> result = Main.evaluateProject(new FSPath(dir), null);
         FileCounts actual = result.unwrap().javaResult.projectCounts.javaCounts;
         assertEquals(expected, actual);
     }

@@ -14,6 +14,7 @@ import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import pl.thesis.evaluation.tasks.CountLinesAndCharacters;
 import pl.thesis.evaluation.tasks.CountFileLinesAndCharacters;
 import pl.thesis.evaluation.tasks.CountPieFileTasks;
@@ -34,7 +35,8 @@ import java.nio.file.Paths;
 public class Main {
     public static void main(String[] args) {
         FSPath dir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.spoofax", "src", "main"));
-        final Result<@NonNull EvaluationResult, @NonNull Exception> evaluationResult = evaluateProject(dir);
+        FSPath resultFile = new FSPath(Paths.get("build", "reports", "case_study_evaluation.txt"));
+        final Result<@NonNull EvaluationResult, @NonNull Exception> evaluationResult = evaluateProject(dir, resultFile);
         System.out.println("Done: " + evaluationResult);
         if (evaluationResult.isOk()) {
             //noinspection ConstantConditions
@@ -42,7 +44,7 @@ public class Main {
         }
     }
 
-    public static Result<@NonNull EvaluationResult, @NonNull Exception> evaluateProject(FSPath dir) {
+    public static Result<@NonNull EvaluationResult, @NonNull Exception> evaluateProject(@NonNull FSPath dir, @Nullable FSPath resultFile) {
         ResourceService resourceService = buildResourceService();
         TaskDefs taskDefs = buildTaskDefs(resourceService);
         Pie pie = new PieBuilderImpl()
@@ -52,7 +54,13 @@ public class Main {
         EvaluateCaseStudy evaluate = getTaskDef(taskDefs, EvaluateCaseStudy.class);
 
         try(MixedSession session = pie.newSession()) {
-            return session.require(evaluate.createTask(new ProjectDirs(dir, dir, dir)));
+            final Result<@NonNull EvaluationResult, @NonNull Exception> result = session.require(evaluate.createTask(new ProjectDirs(dir, dir, dir)));
+            if (resultFile != null && result.isOk()) {
+                WriteEvaluationResultToFile write = getTaskDef(taskDefs, WriteEvaluationResultToFile.class);
+                //noinspection ConstantConditions
+                session.require(write.createTask(new WriteEvaluationResultToFile.Input(result.get(), resultFile)));
+            }
+            return result;
         } catch(ExecException | InterruptedException | NullPointerException e) {
             return Result.ofErr(e);
         }

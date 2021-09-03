@@ -58,6 +58,7 @@ public class WriteEvaluationResultToFile implements TaskDef<WriteEvaluationResul
     @Override
     public @NonNull None exec(@NonNull ExecContext context, @NonNull Input input) throws Exception {
         final HierarchicalResource file = resourceService.getHierarchicalResource(input.file);
+        file.ensureFileExists();
         file.writeString(input.evaluationResult.formatAsTable(), StandardCharsets.UTF_8);
         context.provide(file, ResourceStampers.hashFile());
         return None.instance;

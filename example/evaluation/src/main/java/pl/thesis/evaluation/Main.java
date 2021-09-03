@@ -13,6 +13,7 @@ import mb.resource.ResourceRegistry;
 import mb.resource.ResourceService;
 import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResourceRegistry;
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import pl.thesis.evaluation.tasks.CountLinesAndCharacters;
@@ -44,7 +45,8 @@ public class Main {
         }
     }
 
-    public static Result<@NonNull EvaluationResult, @NonNull Exception> evaluateProject(@NonNull FSPath dir, @Nullable FSPath resultFile) {
+    public static Result<@NonNull EvaluationResult, @NonNull Exception> evaluateProject(
+            @NonNull ResourcePath dir, @Nullable ResourcePath resultFile) {
         ResourceService resourceService = buildResourceService();
         TaskDefs taskDefs = buildTaskDefs(resourceService);
         Pie pie = new PieBuilderImpl()

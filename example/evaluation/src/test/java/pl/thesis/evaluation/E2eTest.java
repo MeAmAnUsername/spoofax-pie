@@ -2,6 +2,7 @@ package pl.thesis.evaluation;
 
 import mb.common.result.Result;
 import mb.resource.fs.FSPath;
+import mb.resource.hierarchical.ResourcePath;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import pl.thesis.evaluation.tasks.EvaluationResult;
@@ -17,9 +18,11 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class E2eTest {
     public final Path E2E_PROJECTS_DIR = Paths.get("src", "test", "resources", "e2e-projects");
+    public final Path RESULT_FILE_DIR = Paths.get("build", "reports", "e2e-tests");
 
     @TestFactory
     public Stream<DynamicTest> createTests() throws IOException {
@@ -41,10 +44,13 @@ public class E2eTest {
             getIntProperty(props, "charactersNoLayout")
         );
 
+        final FSPath resultFile = new FSPath(RESULT_FILE_DIR.resolve(dir.getFileName())).ensureLeafExtension("txt");
+
         @SuppressWarnings("NullableProblems") // Cannot find NonNull and error isn't used anyway, so just ignore
-        Result<EvaluationResult, ?> result = Main.evaluateProject(new FSPath(dir), null);
+        Result<EvaluationResult, ?> result = Main.evaluateProject(new FSPath(dir), resultFile);
         FileCounts actual = result.unwrap().javaResult.projectCounts.javaCounts;
         assertEquals(expected, actual);
+        assertTrue(Files.exists(resultFile.getJavaPath()));
     }
 
     private static int getIntProperty(Properties properties, String name) {

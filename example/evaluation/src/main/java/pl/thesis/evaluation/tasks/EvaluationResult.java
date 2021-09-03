@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public class EvaluationResult implements Serializable {
@@ -44,52 +45,70 @@ public class EvaluationResult implements Serializable {
     @NonNull
     public String formatAsTable() {
         final int indentation = 2;
-        final int nameCellSize = 50;
-        final int javaCellSize = 5;
-        final int oldPieCellSize = 7;
-        final int newPieCellSize = 7;
 
-        StringBuilder sb = new StringBuilder("Evaluation result\n");
+        StringBuilder sb = new StringBuilder();
         appendSpaces(sb, indentation);
         sb.append("| ");
-        appendPaddedStringAlignLeft(sb, "value", nameCellSize);
-        sb.append(" | ");
-        appendPaddedStringAlignLeft(sb, "java", javaCellSize);
-        sb.append(" | ");
-        appendPaddedStringAlignLeft(sb, "old PIE", oldPieCellSize);
-        sb.append(" | ");
-        appendPaddedStringAlignLeft(sb, "new PIE", newPieCellSize);
-        sb.append(" |\n");
+        final String rowStart = sb.toString();
+        final String separator = " | ";
+        final String rowEnd = " |\n";
+
+        final List<Column> columns = getColumns();
+        sb = new StringBuilder("Evaluation result\n");
+
+        // header
+        sb.append(rowStart);
+        AtomicBoolean first = new AtomicBoolean(true);
+        for(Column column : columns) {
+            if (!first.get()) {
+                sb.append(separator);
+            }
+            column.appendHeader(sb);
+            first.set(false);
+        }
+        sb.append(rowEnd);
+
+        // rest of the table
         for(RowProducer rowProducer : getRowProducers()) {
-            appendSpaces(sb, indentation);
-            sb.append("| ");
-            sb.append(rowProducer.name);
-            appendSpaces(sb, nameCellSize - rowProducer.name.length());
-            sb.append(" | ");
-            appendPaddedStringAlignRight(sb, rowProducer.getFunction.apply(javaResult), javaCellSize);
-            sb.append(" | ");
-            appendPaddedStringAlignRight(sb, rowProducer.getFunction.apply(oldPieResult), oldPieCellSize);
-            sb.append(" | ");
-            appendPaddedStringAlignRight(sb, rowProducer.getFunction.apply(newPieResult), newPieCellSize);
-            sb.append(" |\n");
+            sb.append(rowStart);
+            first.set(true);
+            for(Column column : columns) {
+                if (!first.get()) {
+                    sb.append(separator);
+                }
+                column.appendCell(sb, rowProducer);
+                first.set(false);
+            }
+            sb.append(rowEnd);
         }
         return sb.toString();
     }
 
-    private void appendPaddedStringAlignLeft(StringBuilder sb, String str, int totalLength) {
-        sb.append(str);
-        appendSpaces(sb, totalLength - str.length());
+    private static void appendPaddedString(StringBuilder sb, String str, int totalLength, boolean alignLeft) {
+        if (alignLeft) {
+            sb.append(str);
+            appendSpaces(sb, totalLength - str.length());
+        } else {
+            appendSpaces(sb, totalLength - str.length());
+            sb.append(str);
+        }
     }
 
-    private void appendPaddedStringAlignRight(StringBuilder sb, String str, int totalLength) {
-        appendSpaces(sb, totalLength - str.length());
-        sb.append(str);
-    }
-
-    private void appendSpaces(StringBuilder sb, int amount) {
+    private static void appendSpaces(StringBuilder sb, int amount) {
         for(int i = 0; i < amount; i++) {
             sb.append(' ');
         }
+    }
+
+    private List<Column> getColumns() {
+        final Column[] columns = {
+            new Column("value", 50, rowProducer -> rowProducer.name, true),
+            new Column("Java", 5, rowProducer -> Column.intToStringDashForZero(rowProducer.getFunction.apply(javaResult)), false),
+            new Column("old PIE DSL", 11, rowProducer -> Column.intToStringDashForZero(rowProducer.getFunction.apply(javaResult)), false),
+            new Column("new PIE DSL", 11, rowProducer -> Column.intToStringDashForZero(rowProducer.getFunction.apply(javaResult)), false),
+            new Column("absolute difference between Java and new PIE DSL", 48, rowProducer -> Integer.toString(rowProducer.getFunction.apply(javaResult)-rowProducer.getFunction.apply(newPieResult)), false),
+        };
+        return Arrays.asList(columns);
     }
 
     private List<RowProducer> getRowProducers() {
@@ -115,17 +134,33 @@ public class EvaluationResult implements Serializable {
         return Arrays.asList(rowProducers);
     }
 
-    private static class RowProducer {
-        public final String name;
-        public final Function<ProjectEvaluationResult, String> getFunction;
+    private static class Column {
+        public final String header;
+        public final int size;
+        public final Function<RowProducer, String> cellBuilder;
+        public final boolean alignLeft;
 
-        private RowProducer(String name, Function<ProjectEvaluationResult, String> getFunction) {
-            this.name = name;
-            this.getFunction = getFunction;
+        public Column(String header, int size, Function<RowProducer, String> cellBuilder, boolean alignLeft) {
+            if (header.length() > size) {
+                throw new CellContentOutOfBoundsException(header, size, header);
+            }
+            this.header = header;
+            this.size = size;
+            this.cellBuilder = cellBuilder.andThen(contents -> {
+                if (contents.length() > size) {
+                    throw new CellContentOutOfBoundsException(header, size, contents);
+                }
+                return contents;
+            });
+            this.alignLeft = alignLeft;
         }
 
-        public static RowProducer ofIntFunction(String name, Function<ProjectEvaluationResult, Integer> getFunction) {
-            return new RowProducer(name, getFunction.andThen(RowProducer::intToStringDashForZero));
+        public void appendHeader(StringBuilder sb) {
+            appendPaddedString(sb, header, size, alignLeft);
+        }
+
+        public void appendCell(StringBuilder sb, RowProducer rowProducer) {
+            appendPaddedString(sb, cellBuilder.apply(rowProducer), size, alignLeft);
         }
 
         public static String intToStringDashForZero(int val) {
@@ -135,6 +170,26 @@ public class EvaluationResult implements Serializable {
             }
 
             return val == 0 ? "-" : Integer.toString(val);
+        }
+
+        public static class CellContentOutOfBoundsException extends RuntimeException {
+            public CellContentOutOfBoundsException(String header, int size, String contents) {
+                super(String.format("Cell contents '%s' are too large for column '%s' of size %d", contents, header, size));
+            }
+        }
+    }
+
+    private static class RowProducer {
+        public final String name;
+        public final Function<ProjectEvaluationResult, Integer> getFunction;
+
+        private RowProducer(String name, Function<ProjectEvaluationResult, Integer> getFunction) {
+            this.name = name;
+            this.getFunction = getFunction;
+        }
+
+        public static RowProducer ofIntFunction(String name, Function<ProjectEvaluationResult, Integer> getFunction) {
+            return new RowProducer(name, getFunction);
         }
     }
 }

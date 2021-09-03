@@ -1,5 +1,6 @@
 package pl.thesis.evaluation.tasks;
 
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.Serializable;
@@ -7,11 +8,11 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 public class ProjectDirs implements Serializable {
-    @NonNull public final Path javaProject;
-    @NonNull public final Path oldPieProject;
-    @NonNull public final Path newPieProject;
+    @NonNull public final ResourcePath javaProject;
+    @NonNull public final ResourcePath oldPieProject;
+    @NonNull public final ResourcePath newPieProject;
 
-    public ProjectDirs(@NonNull Path javaProject, @NonNull Path oldPieProject, @NonNull Path newPieProject) {
+    public ProjectDirs(@NonNull ResourcePath javaProject, @NonNull ResourcePath oldPieProject, @NonNull ResourcePath newPieProject) {
         this.javaProject = javaProject;
         this.oldPieProject = oldPieProject;
         this.newPieProject = newPieProject;

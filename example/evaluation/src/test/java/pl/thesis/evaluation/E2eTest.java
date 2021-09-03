@@ -4,6 +4,7 @@ import mb.common.result.Result;
 import mb.resource.fs.FSPath;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import pl.thesis.evaluation.tasks.EvaluationResult;
 import pl.thesis.evaluation.tasks.FileCounts;
 import pl.thesis.evaluation.tasks.ProjectEvaluationResult;
 
@@ -41,8 +42,8 @@ public class E2eTest {
         );
 
         @SuppressWarnings("NullableProblems") // Cannot find NonNull and error isn't used anyway, so just ignore
-        Result<ProjectEvaluationResult, ?> result = Main.evaluateProject(new FSPath(dir));
-        FileCounts actual = result.unwrap().projectCounts.javaCounts;
+        Result<EvaluationResult, ?> result = Main.evaluateProject(new FSPath(dir));
+        FileCounts actual = result.unwrap().javaResult.projectCounts.javaCounts;
         assertEquals(expected, actual);
     }
 

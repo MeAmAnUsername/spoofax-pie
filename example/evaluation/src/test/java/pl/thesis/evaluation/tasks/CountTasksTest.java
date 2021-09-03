@@ -19,7 +19,7 @@ public class CountTasksTest {
 
     @Test
     public void testAll() throws Exception {
-        final TaskDefs taskDefs = Main.buildTaskDefs();
+        final TaskDefs taskDefs = Main.buildTaskDefs(Main.buildResourceService());
         final Pie pie = new PieBuilderImpl().addTaskDefs(taskDefs).build();
         final CountTasks main = Main.getTaskDef(taskDefs, CountTasks.class);
         final ResourcePath input = new FSPath(DIR);

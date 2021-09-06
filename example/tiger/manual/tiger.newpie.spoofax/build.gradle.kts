@@ -1,6 +1,12 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
+  id("org.metaborg.spoofax.gradle.project")
+}
+
+spoofaxProject {
+  inputIncludePatterns.add("*.pie")
+  outputIncludePatterns.add("*.java")
 }
 
 fun compositeBuild(name: String) = "$group:$name:$version"
@@ -29,4 +35,12 @@ dependencies {
   // Test
   testImplementation(compositeBuild("spoofax.test"))
   testCompileOnly("org.checkerframework:checker-qual-android")
+}
+
+sourceSets {
+  main {
+    java {
+      srcDir("build/generated/sources/")
+    }
+  }
 }

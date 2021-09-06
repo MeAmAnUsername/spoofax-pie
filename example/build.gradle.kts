@@ -4,6 +4,9 @@ plugins {
 
   // Set versions for plugins to use, only applying them in subprojects (apply false here).
   id("org.metaborg.devenv.spoofax.gradle.langspec") version "0.1.4" apply false
+  // Did not work with the latest stable version (0.5.2), so using SNAPSHOT.
+  // When this plugin was added develop-SNAPSHOT was published on Sun Aug 23 01:00:17 GMT 2020
+  id("org.metaborg.spoofax.gradle.project") version "develop-SNAPSHOT" apply false
   id("de.set.ecj") version "1.4.1" apply false
   id("org.metaborg.coronium.bundle") version "0.3.6" apply false
   id("biz.aQute.bnd.builder") version "5.3.0" apply false

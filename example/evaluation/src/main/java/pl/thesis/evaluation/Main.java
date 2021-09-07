@@ -35,9 +35,12 @@ import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
-        FSPath dir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.spoofax", "src", "main"));
+        FSPath javaDir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.spoofax", "src", "main"));
+        FSPath newPieDir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.newpie.spoofax", "src", "main"));
         FSPath resultFile = new FSPath(Paths.get("build", "reports", "case_study_evaluation.txt"));
-        final Result<@NonNull EvaluationResult, @NonNull Exception> evaluationResult = evaluateProject(dir, resultFile);
+
+        final ProjectDirs projects = new ProjectDirs(javaDir, javaDir, newPieDir);
+        final Result<@NonNull EvaluationResult, @NonNull Exception> evaluationResult = evaluateProject(projects, resultFile);
         System.out.println("Done: " + evaluationResult);
         if (evaluationResult.isOk()) {
             //noinspection ConstantConditions
@@ -46,7 +49,7 @@ public class Main {
     }
 
     public static Result<@NonNull EvaluationResult, @NonNull Exception> evaluateProject(
-            @NonNull ResourcePath dir, @Nullable ResourcePath resultFile) {
+            @NonNull ProjectDirs projects, @Nullable ResourcePath resultFile) {
         ResourceService resourceService = buildResourceService();
         TaskDefs taskDefs = buildTaskDefs(resourceService);
         Pie pie = new PieBuilderImpl()
@@ -56,7 +59,7 @@ public class Main {
         EvaluateCaseStudy evaluate = getTaskDef(taskDefs, EvaluateCaseStudy.class);
 
         try(MixedSession session = pie.newSession()) {
-            final Result<@NonNull EvaluationResult, @NonNull Exception> result = session.require(evaluate.createTask(new ProjectDirs(dir, dir, dir)));
+            final Result<@NonNull EvaluationResult, @NonNull Exception> result = session.require(evaluate.createTask(projects));
             if (resultFile != null && result.isOk()) {
                 WriteEvaluationResultToFile write = getTaskDef(taskDefs, WriteEvaluationResultToFile.class);
                 //noinspection ConstantConditions

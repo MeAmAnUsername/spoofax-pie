@@ -104,9 +104,9 @@ public class EvaluationResult implements Serializable {
         final Column[] columns = {
             new Column("value", 50, rowProducer -> rowProducer.name, true),
             new Column("Java", 5, rowProducer -> Column.intToStringDashForZero(rowProducer.getFunction.apply(javaResult)), false),
-            new Column("old PIE DSL", 11, rowProducer -> Column.intToStringDashForZero(rowProducer.getFunction.apply(javaResult)), false),
-            new Column("new PIE DSL", 11, rowProducer -> Column.intToStringDashForZero(rowProducer.getFunction.apply(javaResult)), false),
-            new Column("absolute difference between Java and new PIE DSL", 48, rowProducer -> Integer.toString(rowProducer.getFunction.apply(javaResult)-rowProducer.getFunction.apply(newPieResult)), false),
+            new Column("old PIE DSL", 11, rowProducer -> Column.intToStringDashForZero(rowProducer.getFunction.apply(oldPieResult)), false),
+            new Column("new PIE DSL", 11, rowProducer -> Column.intToStringDashForZero(rowProducer.getFunction.apply(newPieResult)), false),
+            new Column("absolute difference between Java and new PIE DSL", 48, rowProducer -> Integer.toString(Math.abs(rowProducer.getFunction.apply(javaResult)-rowProducer.getFunction.apply(newPieResult))), false),
         };
         return Arrays.asList(columns);
     }

@@ -1,0 +1,10 @@
+---
+id: org.metaborg:tiger.newpie.spoofax:0.1.0-SNAPSHOT
+name: tiger.newpie
+dependencies:
+  compile:
+    - org.metaborg:tiger.spoofaxcore:0.1.0-SNAPSHOT
+debug:
+  typesmart: false
+build:
+  useBuildSystemSpec: true

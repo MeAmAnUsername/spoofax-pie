@@ -1,3 +1,23 @@
 module mb:tiger:spoofax:task:reusable
 
-func example() -> bool = true
+
+data CompletionResult = foreign java mb.completions.common.CompletionResult {}
+data Term = foreign java mb.spoofax.common.IStrategoTerm {}
+
+// todo: move to separate files
+//import mb:common:style:styleNameFromString
+//import mb:common:util:createEmptyListView
+//import mb:completions:common:{CompletionResult, createCompletionResult, createCompletionProposal}
+//import mb:spoofax:common:IStrategoTerm as Term
+
+func TigerCompleteTaskDef(astProvider: supplier<Term?>) -> CompletionResult? = {
+  val maybeAst = astProvider.get<>();
+  if (maybeAst == null)
+    return null;
+  val ast = maybeAst!;
+  null // todo
+//  createCompletionResult(listViewOf(
+//    createCompletionProposal("mypackage", "description", "", "", "mypackage", styleNameFromString("meta.package")!, createEmptyListView(), false),
+//    createCompletionProposal("myclass", "description", "", "T", "mypackage", styleNameFromString("meta.class")!, createEmptyListView(), false)
+//  ), true);
+}

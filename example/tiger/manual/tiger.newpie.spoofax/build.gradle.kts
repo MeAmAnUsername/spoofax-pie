@@ -28,6 +28,8 @@ dependencies {
   api("org.metaborg:pie.dagger")
   api("com.google.dagger:dagger")
 
+  compileLanguage("org.metaborg:pie.lang:0.16.6")
+
   compileOnly("org.checkerframework:checker-qual-android")
 
   annotationProcessor("com.google.dagger:dagger-compiler")
@@ -40,7 +42,7 @@ dependencies {
 sourceSets {
   main {
     java {
-      srcDir("build/generated/sources/")
+      srcDir("build/generated/sources/pie/")
     }
   }
 }

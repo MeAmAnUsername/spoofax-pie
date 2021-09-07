@@ -7,6 +7,7 @@ import mb.pie.api.stamp.resource.ModifiedResourceStamper;
 import mb.resource.ReadableResource;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import pl.thesis.evaluation.data.FileCounts;
 
 import java.io.IOException;
 import java.io.InputStream;

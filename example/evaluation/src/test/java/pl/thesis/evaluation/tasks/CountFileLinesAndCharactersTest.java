@@ -2,6 +2,7 @@ package pl.thesis.evaluation.tasks;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import pl.thesis.evaluation.data.FileCounts;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

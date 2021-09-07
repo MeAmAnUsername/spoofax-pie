@@ -8,6 +8,7 @@ import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import pl.thesis.evaluation.data.EvaluationResult;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;

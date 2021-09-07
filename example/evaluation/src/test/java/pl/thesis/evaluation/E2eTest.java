@@ -2,12 +2,10 @@ package pl.thesis.evaluation;
 
 import mb.common.result.Result;
 import mb.resource.fs.FSPath;
-import mb.resource.hierarchical.ResourcePath;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import pl.thesis.evaluation.tasks.EvaluationResult;
-import pl.thesis.evaluation.tasks.FileCounts;
-import pl.thesis.evaluation.tasks.ProjectEvaluationResult;
+import pl.thesis.evaluation.data.EvaluationResult;
+import pl.thesis.evaluation.data.FileCounts;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -5,6 +5,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import pl.thesis.evaluation.data.TaskCounts;
 
 import java.io.IOException;
 

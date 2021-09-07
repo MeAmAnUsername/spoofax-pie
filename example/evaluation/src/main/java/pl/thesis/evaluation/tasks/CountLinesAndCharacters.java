@@ -7,6 +7,8 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import pl.thesis.evaluation.data.FileCounts;
+import pl.thesis.evaluation.data.ProjectCounts;
 
 import java.io.IOException;
 import java.util.ArrayList;

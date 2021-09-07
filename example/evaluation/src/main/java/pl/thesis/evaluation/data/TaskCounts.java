@@ -1,4 +1,4 @@
-package pl.thesis.evaluation.tasks;
+package pl.thesis.evaluation.data;
 
 import java.io.Serializable;
 import java.util.Objects;

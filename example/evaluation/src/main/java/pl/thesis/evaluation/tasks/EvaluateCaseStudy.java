@@ -4,6 +4,8 @@ import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import pl.thesis.evaluation.data.EvaluationResult;
+import pl.thesis.evaluation.data.ProjectDirs;
 
 public class EvaluateCaseStudy implements TaskDef<@NonNull ProjectDirs, @NonNull Result<@NonNull EvaluationResult, @NonNull Exception>> {
     @NonNull private final EvaluateProject evaluateProject;

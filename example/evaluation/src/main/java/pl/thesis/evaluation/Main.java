@@ -26,9 +26,9 @@ import pl.thesis.evaluation.tasks.CountTaskDefs;
 import pl.thesis.evaluation.tasks.CountTasks;
 import pl.thesis.evaluation.tasks.EvaluateCaseStudy;
 import pl.thesis.evaluation.tasks.EvaluateProject;
-import pl.thesis.evaluation.tasks.EvaluationResult;
+import pl.thesis.evaluation.data.EvaluationResult;
 import pl.thesis.evaluation.tasks.IsTaskDef;
-import pl.thesis.evaluation.tasks.ProjectDirs;
+import pl.thesis.evaluation.data.ProjectDirs;
 import pl.thesis.evaluation.tasks.WriteEvaluationResultToFile;
 
 import java.nio.file.Paths;

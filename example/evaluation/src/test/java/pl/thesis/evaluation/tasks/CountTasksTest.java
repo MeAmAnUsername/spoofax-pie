@@ -8,6 +8,7 @@ import mb.resource.fs.FSPath;
 import mb.resource.hierarchical.ResourcePath;
 import org.junit.jupiter.api.Test;
 import pl.thesis.evaluation.Main;
+import pl.thesis.evaluation.data.TaskCounts;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

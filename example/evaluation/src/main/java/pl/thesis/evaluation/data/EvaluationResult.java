@@ -103,10 +103,10 @@ public class EvaluationResult implements Serializable {
     private List<Column> getColumns() {
         final Column[] columns = {
             new Column("value", 50, rowProducer -> rowProducer.name, true),
-            new Column("Java", 5, rowProducer -> Column.intToStringDashForZero(rowProducer.getFunction.apply(javaResult)), false),
-            new Column("old PIE DSL", 11, rowProducer -> Column.intToStringDashForZero(rowProducer.getFunction.apply(oldPieResult)), false),
-            new Column("new PIE DSL", 11, rowProducer -> Column.intToStringDashForZero(rowProducer.getFunction.apply(newPieResult)), false),
-            new Column("absolute difference between Java and new PIE DSL", 48, rowProducer -> Integer.toString(Math.abs(rowProducer.getFunction.apply(javaResult)-rowProducer.getFunction.apply(newPieResult))), false),
+            new Column("Java", 5, rowProducer -> Column.intToString(rowProducer.getFunction.apply(javaResult), false), false),
+            new Column("old PIE DSL", 11, rowProducer -> Column.intToString(rowProducer.getFunction.apply(oldPieResult), false), false),
+            new Column("new PIE DSL", 11, rowProducer -> Column.intToString(rowProducer.getFunction.apply(newPieResult), false), false),
+            new Column("absolute difference between Java and new PIE DSL", 48, rowProducer -> Column.intToString(rowProducer.getFunction.apply(newPieResult) - rowProducer.getFunction.apply(javaResult), true), false),
         };
         return Arrays.asList(columns);
     }
@@ -163,13 +163,19 @@ public class EvaluationResult implements Serializable {
             appendPaddedString(sb, cellBuilder.apply(rowProducer), size, alignLeft);
         }
 
-        public static String intToStringDashForZero(int val) {
-            if (val < 0) {
+        public static String intToString(int val, boolean addSign) {
+            if (val == 0) {
+                return addSign ? "0" : "-";
+            } else if (val < 0) {
+                if (addSign) {
+                    return Integer.toString(val);
+                }
+
                 // Does not need to be an error, but I am not expecting it so probably signifies a bug
                 throw new RuntimeException("Unexpected negative value "+val);
             }
 
-            return val == 0 ? "-" : Integer.toString(val);
+            return (addSign ? "+" : "") + val;
         }
 
         public static class CellContentOutOfBoundsException extends RuntimeException {

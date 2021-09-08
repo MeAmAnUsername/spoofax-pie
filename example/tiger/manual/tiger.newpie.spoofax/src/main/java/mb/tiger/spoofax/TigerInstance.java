@@ -142,7 +142,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
 
     @Override
     public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        return complete.createTask(new TigerCompleteTaskDef.Input(parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get))); // TODO: use Result.
+        return complete.createTask(parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get)); // TODO: use Result.
     }
 
     @Override

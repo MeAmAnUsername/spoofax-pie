@@ -4,6 +4,15 @@ module mb:tiger:spoofax:task:reusable
 data CompletionResult = foreign java mb.completions.common.CompletionResult {}
 data Term = foreign java org.spoofax.interpreter.terms.IStrategoTerm {}
 
+// imports in Java file
+// import mb.common.region.Region;
+// import mb.common.style.StyleName;
+// import mb.common.util.ListView;
+// import mb.completions.common.CompletionProposal;
+// import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+// import org.spoofax.terms.attachments.OriginAttachment;
+
+
 // todo: move to separate files
 //import mb:common:style:styleNameFromString
 //import mb:common:util:createEmptyListView
@@ -14,8 +23,8 @@ func TigerCompleteTaskDef(astProvider: supplier<Term?>) -> CompletionResult? = {
   val maybeAst = (astProvider.get<>());
   if (maybeAst == null)
     return null;
+  val ast = maybeAst!;
   null // todo
-//  val ast = maybeAst!;
 //  createCompletionResult(listViewOf(
 //    createCompletionProposal("mypackage", "description", "", "", "mypackage", styleNameFromString("meta.package")!, createEmptyListView(), false),
 //    createCompletionProposal("myclass", "description", "", "T", "mypackage", styleNameFromString("meta.class")!, createEmptyListView(), false)

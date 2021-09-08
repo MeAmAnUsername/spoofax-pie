@@ -127,7 +127,7 @@ public class EvaluationResult implements Serializable {
             RowProducer.ofIntFunction("total characters excluding layout" , result -> result.projectCounts.javaCounts.charsIncludingLayout+result.projectCounts.pieCounts.charsIncludingLayout),
             RowProducer.ofIntFunction("tasks implemented in java" , result -> result.taskCounts.javaTasks),
             RowProducer.ofIntFunction("tasks fully implemented in PIE DSL" , result -> result.taskCounts.pieTasks-result.taskCounts.pieTasksWithHelperFunction),
-            RowProducer.ofIntFunction("tasks implemented in PIE DSL with helper function" , result -> result.taskCounts.pieTasks-result.taskCounts.pieTasksWithHelperFunction),
+            RowProducer.ofIntFunction("tasks implemented in PIE DSL with helper function" , result -> result.taskCounts.pieTasksWithHelperFunction),
             RowProducer.ofIntFunction("total tasks implemented in PIE DSL" , result -> result.taskCounts.pieTasks),
             RowProducer.ofIntFunction("total tasks" , result -> result.taskCounts.javaTasks+result.taskCounts.pieTasks),
         };

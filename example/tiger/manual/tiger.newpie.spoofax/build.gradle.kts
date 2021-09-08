@@ -2,6 +2,7 @@ plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
   id("org.metaborg.devenv.spoofax.gradle.project")
+//  id("org.metaborg.spoofax.gradle.project")
 }
 
 spoofaxProject {
@@ -44,5 +45,11 @@ sourceSets {
     java {
       srcDir("build/generated/sources/pie/")
     }
+  }
+}
+
+afterEvaluate {
+  tasks.named("spoofaxBuild") {
+    outputs.upToDateWhen { false }
   }
 }

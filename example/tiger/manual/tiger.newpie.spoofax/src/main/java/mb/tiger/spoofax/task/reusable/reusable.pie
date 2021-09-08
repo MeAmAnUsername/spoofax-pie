@@ -2,7 +2,7 @@ module mb:tiger:spoofax:task:reusable
 
 
 data CompletionResult = foreign java mb.completions.common.CompletionResult {}
-data Term = foreign java mb.common.IStrategoTerm {}
+data Term = foreign java org.spoofax.interpreter.terms.IStrategoTerm {}
 
 // todo: move to separate files
 //import mb:common:style:styleNameFromString

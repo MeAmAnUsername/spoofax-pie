@@ -1,16 +1,19 @@
 module mb:tiger:spoofax:task:reusable
 
-
-data CompletionResult = foreign java mb.completions.common.CompletionResult {}
 data Term = foreign java org.spoofax.interpreter.terms.IStrategoTerm {}
 
-// imports in Java file
-// import mb.common.region.Region;
-// import mb.common.style.StyleName;
-// import mb.common.util.ListView;
-// import mb.completions.common.CompletionProposal;
-// import org.spoofax.jsglr.client.imploder.ImploderAttachment;
-// import org.spoofax.terms.attachments.OriginAttachment;
+data StyleName = foreign java mb.common.style.StyleName {}
+func styleNameFromString(name: string) -> StyleName? = foreign java mb.common.style.StyleName#fromString
+
+data CompletionProposal = foreign java mb.completions.common.CompletionProposal {}
+func createCompletionProposal(string, string, string, string, string, StyleName, ListView, bool) -> CompletionProposal = foreign java constructor mb.completions.common.CompletionProposal
+
+data ListView = foreign java mb.common.util.ListView {}
+func createEmptyListView() -> ListView = foreign java mb.common.util.ListView#of
+func listViewOf(proposals: CompletionProposal*) -> ListView = foreign java mb.common.util.ListView#of
+
+data CompletionResult = foreign java mb.completions.common.CompletionResult {}
+func createCompletionResult(listView: ListView, bool) -> CompletionResult = foreign java constructor mb.completions.common.CompletionResult
 
 
 // todo: move to separate files
@@ -24,9 +27,8 @@ func TigerCompleteTaskDef(astProvider: supplier<Term?>) -> CompletionResult? = {
   if (maybeAst == null)
     return null;
   val ast = maybeAst!;
-  null // todo
-//  createCompletionResult(listViewOf(
-//    createCompletionProposal("mypackage", "description", "", "", "mypackage", styleNameFromString("meta.package")!, createEmptyListView(), false),
-//    createCompletionProposal("myclass", "description", "", "T", "mypackage", styleNameFromString("meta.class")!, createEmptyListView(), false)
-//  ), true);
+  createCompletionResult(listViewOf([
+    createCompletionProposal("mypackage", "description", "", "", "mypackage", styleNameFromString("meta.package")!, createEmptyListView(), false),
+    createCompletionProposal("myclass", "description", "", "T", "mypackage", styleNameFromString("meta.class")!, createEmptyListView(), false)
+  ]), true)
 }

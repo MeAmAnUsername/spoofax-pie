@@ -4,7 +4,7 @@ import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerModule;
 import mb.spoofax.test.SingleLanguageTestBase;
 
-class TestBase extends SingleLanguageTestBase<TigerResourcesComponent, TigerComponent> {
+public class TestBase extends SingleLanguageTestBase<TigerResourcesComponent, TigerComponent> {
     protected TestBase() {
         super(
             DaggerLoggerComponent.builder().loggerModule(LoggerModule.stdOutVerbose()).build(),

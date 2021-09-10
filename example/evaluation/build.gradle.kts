@@ -14,8 +14,7 @@ dependencies {
 }
 
 task<JavaExec>("evaluate") {
-  // todo: add dependency on tiger.newpie.spoofax:build
-  dependsOn(":tiger.spoofax:build")
+  dependsOn(":tiger.spoofax:build", ":tiger.newpie.spoofax:build")
 
   group = "Evaluation"
   description = "Evaluate the case studies for Ivo's thesis"

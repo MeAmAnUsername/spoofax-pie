@@ -40,6 +40,7 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
 "tiger/manual".run {
   includeProject("tiger", "tiger/manual/tiger")
   includeProject("tiger.spoofax", "tiger/manual/tiger.spoofax")
+  includeProject("tiger.oldpie.spoofax", "tiger/manual/tiger.oldpie.spoofax")
   includeProject("tiger.newpie.spoofax", "tiger/manual/tiger.newpie.spoofax")
   includeProject("tiger.cli", "tiger/manual/tiger.cli")
   includeProject("tiger.eclipse", "tiger/manual/tiger.eclipse")

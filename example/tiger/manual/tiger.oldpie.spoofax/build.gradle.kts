@@ -28,7 +28,7 @@ dependencies {
   api("org.metaborg:pie.dagger")
   api("com.google.dagger:dagger")
 
-  compileLanguage("org.metaborg:pie.lang:0.16.6")
+  compileLanguage("org.metaborg:pie.lang:0.4.0-SNAPSHOT")
 
   compileOnly("org.checkerframework:checker-qual-android")
 

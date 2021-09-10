@@ -1,6 +1,6 @@
 ---
-id: org.metaborg:tiger.newpie.spoofax:0.1.0-SNAPSHOT
-name: tiger.newpie
+id: org.metaborg:tiger.oldpie.spoofax:0.1.0-SNAPSHOT
+name: tiger.oldpie
 dependencies:
   compile:
     - org.metaborg:tiger.spoofaxcore:0.1.0-SNAPSHOT

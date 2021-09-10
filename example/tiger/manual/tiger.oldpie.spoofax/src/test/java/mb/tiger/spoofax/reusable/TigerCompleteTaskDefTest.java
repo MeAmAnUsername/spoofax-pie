@@ -24,7 +24,7 @@ public class TigerCompleteTaskDefTest extends TestBase {
         System.out.println("taskDefs:");
         taskDefs.getAllTaskDefs().forEach(taskDef -> System.out.println(taskDef.getId()));
         TigerParse parse = (TigerParse) taskDefs.getTaskDef("mb.tiger.spoofax.task.reusable.TigerParse");
-        TigerCompleteTaskDef tigerCompleteTaskDef = (TigerCompleteTaskDef) taskDefs.getTaskDef("TigerCompleteTaskDef");
+        TigerCompleteTaskDef tigerCompleteTaskDef = (TigerCompleteTaskDef) taskDefs.getTaskDef("mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef");
 
         final TextResource resource = textResourceRegistry.createResource("1 + 2", "a.tig");
         final Supplier<IStrategoTerm> term = parse.inputBuilder()
@@ -40,7 +40,7 @@ public class TigerCompleteTaskDefTest extends TestBase {
             });
 
         try(final MixedSession session = newSession()) {
-            final CompletionResult result = session.require(tigerCompleteTaskDef.createTask(term));
+            final CompletionResult result = session.require(tigerCompleteTaskDef.createTask(new TigerCompleteTaskDef.Input(term)));
             assertTrue(result.isComplete());
             assertEquals(2, result.getProposals().size());
         }

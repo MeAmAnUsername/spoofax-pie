@@ -36,10 +36,11 @@ import java.nio.file.Paths;
 public class Main {
     public static void main(String[] args) {
         FSPath javaDir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.spoofax", "src", "main"));
+        FSPath oldPieDir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.oldpie.spoofax", "src", "main"));
         FSPath newPieDir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.newpie.spoofax", "src", "main"));
         FSPath resultFile = new FSPath(Paths.get("build", "reports", "case_study_evaluation.txt"));
 
-        final ProjectDirs projects = new ProjectDirs(javaDir, javaDir, newPieDir);
+        final ProjectDirs projects = new ProjectDirs(javaDir, oldPieDir, newPieDir);
         final Result<@NonNull EvaluationResult, @NonNull Exception> evaluationResult = evaluateProject(projects, resultFile);
         System.out.println("Done: " + evaluationResult);
         if (evaluationResult.isOk()) {

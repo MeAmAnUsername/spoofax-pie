@@ -1,0 +1,11 @@
+module gen/debug
+
+imports
+
+  libspoofax/stratego/debug
+
+rules
+
+  pie-try-fail(|n) = debug(|$[Failed to apply [n] to:[" "]])
+  pie-try-debug(s|n) = s <+ (pie-try-fail(|n); fail)
+  pie-filter-debug(s|n) = filter(s <+ pie-try-debug(s|n))

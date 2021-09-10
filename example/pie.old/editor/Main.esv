@@ -1,0 +1,19 @@
+module Main
+
+imports
+
+  Syntax
+  Analysis
+
+language
+
+  extensions : pie
+
+  provider : target/metaborg/stratego.ctree
+
+menus
+
+  menu: "Generate"
+    action: "Kotlin" = generate-kotlin-file
+    action: "Java" = generate-java-file
+    

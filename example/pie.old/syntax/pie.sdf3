@@ -1,0 +1,21 @@
+module pie
+
+imports
+  
+  lex/literal
+  lex/layout
+  lex/comment
+  type
+  data
+  func_def
+  func_body
+
+context-free start-symbols
+  
+  Start
+
+context-free syntax
+
+  Start.Program = <<{Def "\n"}*>>
+  Def = DataDef
+  Def = FuncDef

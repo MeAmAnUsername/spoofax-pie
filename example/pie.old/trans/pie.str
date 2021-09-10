@@ -1,0 +1,18 @@
+module pie
+
+imports
+  
+  completion/completion
+  pp
+  outline
+  analysis
+  gen/kotlin/main
+  gen/java/main
+
+rules // Debugging
+  
+  debug-show-aterm:
+    (node, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"aterm")> path
+    ; result   := node

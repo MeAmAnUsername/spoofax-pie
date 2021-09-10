@@ -1,0 +1,87 @@
+module gen/util
+
+imports
+  
+  libspoofax/stratego/debug
+  nabl2/api
+
+rules // Generic strategies for getting properties and types of anything
+
+  pie-prop(|ns, prop):
+    t -> <pie-occ-prop(|prop)> t
+    where
+      <nabl2-get-occurrence-ns> t
+      
+  pie-prop(|ns, prop):
+    t -> <pie-ast-ref-prop(|ns, prop)> t
+    where
+      <not(nabl2-get-occurrence-ns); is-string> t
+
+  pie-type(|ns) = pie-prop(|ns, "type")
+  
+  pie-type:
+    t -> <pie-ast-type> t
+    where
+      <not(nabl2-get-occurrence-ns); not(is-string)> t
+
+rules // AST type
+
+  pie-ast-type = nabl2-get-ast-type
+  
+rules // Property of reference in the AST
+  
+  pie-ast-ref-prop(|ns, prop):
+    term -> val
+    with
+      a      := <AstAnalysis>
+    ; refOcc := <nabl2-mk-occurrence(|ns)> term
+    ; defOcc := <nabl2-get-resolved-name(|a); Fst> refOcc
+    ; val    := <nabl2-get-property(|a, prop)> defOcc
+  
+  pie-ast-ref-type(|ns) = pie-ast-ref-prop(|ns, "type")
+
+rules // Property of occurrence
+  
+  pie-occ-prop(|prop):
+    occ -> val
+    with
+      a   := <AstAnalysis>
+    ; val := <nabl2-get-property(|a, prop)> occ
+
+  pie-occ-type = pie-occ-prop(|"type")
+
+rules
+
+  pie-set-ast-analysis:
+    ast -> ast
+    with
+      rules(AstAnalysis : _ -> <nabl2-get-ast-analysis> ast)
+
+rules
+
+  pie-sep-nl    = separate-by(|"\n")
+  pie-sep-comma = separate-by(|", ")
+  pie-sep-space = separate-by(|" ")
+  
+  pie-remove-emptystrings = filter(not(?""))
+  
+  pie-sep-concat(|sep) = pie-remove-emptystrings; separate-by(|sep); concat-strings
+  pie-concat-nl = pie-sep-concat(|"\n")
+  pie-concat-comma = pie-sep-concat(|", ")
+  pie-concat-space = pie-sep-concat(|" ")
+  pie-concat-commanl = pie-sep-concat(|",\n")
+  
+  pie-prepend-comma-nonempty: 
+    [] -> []
+  pie-prepend-comma-nonempty: 
+    list -> [", "|list]
+    where
+      <not(?[])> list
+
+rules
+
+  pie-sanitize-class-id = string-replace(|"-", "_")
+  
+rules
+
+  error(|message) = debug(|message); fail

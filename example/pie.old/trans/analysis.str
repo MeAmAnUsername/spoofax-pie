@@ -1,0 +1,29 @@
+module analysis
+
+imports
+  
+  nabl2/api
+  nabl2/runtime
+  nabl2/shared
+  
+  statsem/-
+  desugar
+  pp
+
+rules // Analysis
+
+  editor-analyze = nabl2-analyze(desugar-all)
+
+rules // Debugging
+  
+  debug-show-aterm: 
+    (selected, _, _, path, project-path) -> (filename, result)
+    with 
+      filename := <guarantee-extension(|"aterm")> path
+    ; result   := selected
+
+  debug-show-analyzed:
+    (selected, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"analyzed.aterm")> path
+    ; result   := selected

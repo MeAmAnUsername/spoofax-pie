@@ -54,11 +54,27 @@ public class EvaluationResult implements Serializable {
         final String rowEnd = " |\n";
 
         final List<Column> columns = getColumns();
-        sb = new StringBuilder("Evaluation result\n");
+
+        // separatorRow
+        sb = new StringBuilder();
+        appendSpaces(sb, indentation);
+        sb.append("|-");
+        AtomicBoolean first = new AtomicBoolean(true);
+        for(Column column : columns) {
+            if (!first.get()) {
+                sb.append("-|-");
+            }
+            appendChars(sb, column.size, '-');
+            first.set(false);
+        }
+        sb.append("-|\n");
+        final String separatorRow = sb.toString();
 
         // header
+        sb = new StringBuilder("Evaluation result\n");
+        sb.append(separatorRow);
         sb.append(rowStart);
-        AtomicBoolean first = new AtomicBoolean(true);
+        first.set(true);
         for(Column column : columns) {
             if (!first.get()) {
                 sb.append(separator);
@@ -67,9 +83,15 @@ public class EvaluationResult implements Serializable {
             first.set(false);
         }
         sb.append(rowEnd);
+        sb.append(separatorRow);
 
         // rest of the table
-        for(RowProducer rowProducer : getRowProducers()) {
+        for(Row row : getRows()) {
+            if (row instanceof SeparatorRow) {
+                sb.append(separatorRow);
+                continue;
+            }
+            RowProducer rowProducer = (RowProducer)row;
             sb.append(rowStart);
             first.set(true);
             for(Column column : columns) {
@@ -81,6 +103,8 @@ public class EvaluationResult implements Serializable {
             }
             sb.append(rowEnd);
         }
+
+        sb.append(separatorRow);
         return sb.toString();
     }
 
@@ -95,8 +119,12 @@ public class EvaluationResult implements Serializable {
     }
 
     private static void appendSpaces(StringBuilder sb, int amount) {
+        appendChars(sb, amount, ' ');
+    }
+
+    private static void appendChars(StringBuilder sb, int amount, char chr) {
         for(int i = 0; i < amount; i++) {
-            sb.append(' ');
+            sb.append(chr);
         }
     }
 
@@ -112,27 +140,29 @@ public class EvaluationResult implements Serializable {
         return Arrays.asList(columns);
     }
 
-    private List<RowProducer> getRowProducers() {
-        final RowProducer[] rowProducers = {
+    private List<Row> getRows() {
+        final Row[] rows = {
             RowProducer.ofIntFunction("java lines including layout", result -> result.projectCounts.javaCounts.linesIncludingLayout),
             RowProducer.ofIntFunction("java lines excluding layout", result -> result.projectCounts.javaCounts.linesExcludingLayout),
             RowProducer.ofIntFunction("PIE DSL lines including layout" , result -> result.projectCounts.pieCounts.linesIncludingLayout),
             RowProducer.ofIntFunction("PIE DSL lines excluding layout" , result -> result.projectCounts.pieCounts.linesExcludingLayout),
             RowProducer.ofIntFunction("total lines including layout" , result -> result.projectCounts.javaCounts.linesIncludingLayout+result.projectCounts.pieCounts.linesIncludingLayout),
             RowProducer.ofIntFunction("total lines excluding layout" , result -> result.projectCounts.javaCounts.linesExcludingLayout+result.projectCounts.pieCounts.linesExcludingLayout),
+            new SeparatorRow(),
             RowProducer.ofIntFunction("java characters including layout", result -> result.projectCounts.javaCounts.charsIncludingLayout),
             RowProducer.ofIntFunction("java characters excluding layout", result -> result.projectCounts.javaCounts.charsExcludingLayout),
             RowProducer.ofIntFunction("PIE DSL characters including layout" , result -> result.projectCounts.pieCounts .charsIncludingLayout),
             RowProducer.ofIntFunction("PIE DSL characters excluding layout" , result -> result.projectCounts.pieCounts .charsExcludingLayout),
             RowProducer.ofIntFunction("total characters including layout" , result -> result.projectCounts.javaCounts.charsIncludingLayout+result.projectCounts.pieCounts.charsIncludingLayout),
             RowProducer.ofIntFunction("total characters excluding layout" , result -> result.projectCounts.javaCounts.charsExcludingLayout+result.projectCounts.pieCounts.charsExcludingLayout),
+            new SeparatorRow(),
             RowProducer.ofIntFunction("tasks implemented in java" , result -> result.taskCounts.javaTasks),
             RowProducer.ofIntFunction("tasks fully implemented in PIE DSL" , result -> result.taskCounts.pieTasks-result.taskCounts.pieTasksWithHelperFunction),
             RowProducer.ofIntFunction("tasks implemented in PIE DSL with helper function" , result -> result.taskCounts.pieTasksWithHelperFunction),
             RowProducer.ofIntFunction("total tasks implemented in PIE DSL" , result -> result.taskCounts.pieTasks),
             RowProducer.ofIntFunction("total tasks" , result -> result.taskCounts.javaTasks+result.taskCounts.pieTasks),
         };
-        return Arrays.asList(rowProducers);
+        return Arrays.asList(rows);
     }
 
     private static class Column {
@@ -186,7 +216,11 @@ public class EvaluationResult implements Serializable {
         }
     }
 
-    private static class RowProducer {
+    private interface Row { }
+
+    private static class SeparatorRow implements Row { }
+
+    private static class RowProducer implements Row {
         public final String name;
         public final Function<ProjectEvaluationResult, Integer> getFunction;
 

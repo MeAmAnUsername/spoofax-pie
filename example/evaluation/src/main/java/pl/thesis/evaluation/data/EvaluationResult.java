@@ -135,7 +135,9 @@ public class EvaluationResult implements Serializable {
             new Column("old PIE DSL", 11, rowProducer -> Column.intToString(rowProducer.getFunction.apply(oldPieResult), false), false),
             new Column("new PIE DSL", 11, rowProducer -> Column.intToString(rowProducer.getFunction.apply(newPieResult), false), false),
             new Column("Java vs. DSL", 12, rowProducer -> Column.intToString(rowProducer.getFunction.apply(newPieResult) - rowProducer.getFunction.apply(javaResult), true), false),
-            new Column("old vs new", 10, rowProducer -> Column.intToString(rowProducer.getFunction.apply(newPieResult) - rowProducer.getFunction.apply(oldPieResult), true), false),
+            new Column("Java vs. DSL (%)", 16, rowProducer -> Column.percentageDiff(rowProducer, javaResult, newPieResult), false),
+            new Column("old vs. new", 11, rowProducer -> Column.intToString(rowProducer.getFunction.apply(newPieResult) - rowProducer.getFunction.apply(oldPieResult), true), false),
+            new Column("old vs. new (%)", 15, rowProducer -> Column.percentageDiff(rowProducer, oldPieResult, newPieResult), false),
         };
         return Arrays.asList(columns);
     }
@@ -184,6 +186,23 @@ public class EvaluationResult implements Serializable {
                 return contents;
             });
             this.alignLeft = alignLeft;
+        }
+
+        public static String percentageDiff(RowProducer rowProducer,
+                                            ProjectEvaluationResult baselineResult,
+                                            ProjectEvaluationResult newResult) {
+            final int baseline = rowProducer.getFunction.apply(baselineResult);
+            final int newVal = rowProducer.getFunction.apply(newResult);
+            double percentage = ((double)(newVal - baseline)) / (double)baseline * 100.0;
+            if (baseline == 0) {
+                if (newVal > 0) {
+                    return "+inf %";
+                } else if (newVal < 0) {
+                    return "-inf %";
+                }
+                percentage = 0.0;
+            }
+            return String.format("%c%2.2f %%", percentage > 0.0 ? '+' : ' ' , percentage);
         }
 
         public void appendHeader(StringBuilder sb) {

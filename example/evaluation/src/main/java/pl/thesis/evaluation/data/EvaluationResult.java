@@ -134,9 +134,9 @@ public class EvaluationResult implements Serializable {
             new Column("Java", 5, rowProducer -> Column.intToString(rowProducer.getFunction.apply(javaResult), false), false),
             new Column("old PIE DSL", 11, rowProducer -> Column.intToString(rowProducer.getFunction.apply(oldPieResult), false), false),
             new Column("new PIE DSL", 11, rowProducer -> Column.intToString(rowProducer.getFunction.apply(newPieResult), false), false),
-            new Column("Java vs. DSL", 12, rowProducer -> Column.intToString(rowProducer.getFunction.apply(newPieResult) - rowProducer.getFunction.apply(javaResult), true), false),
+            new Column("Java vs. DSL", 12, rowProducer -> Column.absoluteDiff(rowProducer, newPieResult, javaResult), false),
             new Column("Java vs. DSL (%)", 16, rowProducer -> Column.percentageDiff(rowProducer, javaResult, newPieResult), false),
-            new Column("old vs. new", 11, rowProducer -> Column.intToString(rowProducer.getFunction.apply(newPieResult) - rowProducer.getFunction.apply(oldPieResult), true), false),
+            new Column("old vs. new", 11, rowProducer -> Column.absoluteDiff(rowProducer, newPieResult, oldPieResult), false),
             new Column("old vs. new (%)", 15, rowProducer -> Column.percentageDiff(rowProducer, oldPieResult, newPieResult), false),
         };
         return Arrays.asList(columns);
@@ -203,6 +203,12 @@ public class EvaluationResult implements Serializable {
                 percentage = 0.0;
             }
             return String.format("%c%2.2f %%", percentage > 0.0 ? '+' : ' ' , percentage);
+        }
+
+        public static String absoluteDiff(RowProducer rowProducer, ProjectEvaluationResult newResult, ProjectEvaluationResult baselineResult) {
+            final int baseline = rowProducer.getFunction.apply(baselineResult);
+            final int newVal = rowProducer.getFunction.apply(newResult);
+            return intToString(newVal - baseline, true);
         }
 
         public void appendHeader(StringBuilder sb) {

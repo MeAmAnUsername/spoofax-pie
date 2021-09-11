@@ -131,9 +131,9 @@ public class EvaluationResult implements Serializable {
     private List<Column> getColumns() {
         final Column[] columns = {
             new Column("value", 50, rowProducer -> rowProducer.name, true),
-            new Column("Java", 5, rowProducer -> Column.intToString(rowProducer.getFunction.apply(javaResult), false), false),
-            new Column("old PIE DSL", 11, rowProducer -> Column.intToString(rowProducer.getFunction.apply(oldPieResult), false), false),
-            new Column("new PIE DSL", 11, rowProducer -> Column.intToString(rowProducer.getFunction.apply(newPieResult), false), false),
+            new Column("Java", 5, rowProducer -> Column.singleVal(rowProducer, javaResult), false),
+            new Column("old PIE DSL", 11, rowProducer -> Column.singleVal(rowProducer, oldPieResult), false),
+            new Column("new PIE DSL", 11, rowProducer -> Column.singleVal(rowProducer, newPieResult), false),
             new Column("Java vs. DSL", 12, rowProducer -> Column.absoluteDiff(rowProducer, newPieResult, javaResult), false),
             new Column("Java vs. DSL (%)", 16, rowProducer -> Column.percentageDiff(rowProducer, javaResult, newPieResult), false),
             new Column("old vs. new", 11, rowProducer -> Column.absoluteDiff(rowProducer, newPieResult, oldPieResult), false),
@@ -209,6 +209,10 @@ public class EvaluationResult implements Serializable {
             final int baseline = rowProducer.getFunction.apply(baselineResult);
             final int newVal = rowProducer.getFunction.apply(newResult);
             return intToString(newVal - baseline, true);
+        }
+
+        public static String singleVal(RowProducer rowProducer, ProjectEvaluationResult result) {
+            return intToString(rowProducer.getFunction.apply(result), false);
         }
 
         public void appendHeader(StringBuilder sb) {

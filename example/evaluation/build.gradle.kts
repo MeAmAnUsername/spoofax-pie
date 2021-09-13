@@ -3,7 +3,7 @@ plugins {
   id("org.metaborg.gradle.config.junit-testing")
 }
 
-val pieVersion = "15.0.0"
+val pieVersion = "0.15.0"
 
 dependencies {
   implementation("org.metaborg", "pie.api", pieVersion)

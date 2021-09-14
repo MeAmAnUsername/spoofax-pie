@@ -2,24 +2,30 @@ package pl.thesis.evaluation.tasks;
 
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ModifiedResourceStamper;
+import mb.resource.ReadableResource;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import pl.thesis.evaluation.data.FileCounts;
 import pl.thesis.evaluation.data.ProjectCounts;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CountLinesAndCharacters implements TaskDef<@NonNull ResourcePath, @NonNull Result<@NonNull ProjectCounts, @NonNull Exception>> {
-    @NonNull private final CountFileLinesAndCharacters countFileLinesAndCharacters;
+public class CountLinesAndCharacters implements TaskDef<@NonNull CountArgs, @NonNull Result<@NonNull ProjectCounts, @NonNull Exception>> {
 
-    public CountLinesAndCharacters(@NonNull CountFileLinesAndCharacters countFileLinesAndCharacters) {
+    @NonNull private final CountFileLinesAndCharacters countFileLinesAndCharacters;
+    @NonNull private final IsLibraryFile isLibraryFile;
+
+    public CountLinesAndCharacters(@NonNull CountFileLinesAndCharacters countFileLinesAndCharacters, @NonNull IsLibraryFile isLibraryFile) {
         this.countFileLinesAndCharacters = countFileLinesAndCharacters;
+        this.isLibraryFile = isLibraryFile;
     }
 
     @java.lang.Override
@@ -28,23 +34,34 @@ public class CountLinesAndCharacters implements TaskDef<@NonNull ResourcePath, @
     }
 
     @java.lang.Override
-    public @NonNull Result<@NonNull ProjectCounts, @NonNull Exception> exec(ExecContext context, @NonNull ResourcePath input) {
+    public @NonNull Result<@NonNull ProjectCounts, @NonNull Exception> exec(ExecContext context, @NonNull CountArgs input) {
         try {
             MutableFileCounts javaCounts = new MutableFileCounts();
             MutableFileCounts pieCounts = new MutableFileCounts();
+            MutableFileCounts pieLibraryCounts = new MutableFileCounts();
             List<Exception> errors = new ArrayList<>();
-            HierarchicalResource dir = context.require(input);
+            HierarchicalResource dir = context.require(input.dir);
             dir.walkForEach(ResourceMatcher.ofDirectory(), context::require);
             dir.walk(ResourceMatcher.ofFileExtension("java"))
                 .map(file -> context.require(countFileLinesAndCharacters.createTask(file.getPath())))
                 .forEach(result -> result.ifElse(javaCounts::addFileCounts, errors::add));
             dir.walk(ResourceMatcher.ofFileExtension("pie"))
-                .map(file -> context.require(countFileLinesAndCharacters.createTask(file.getPath())))
-                .forEach(result -> result.ifElse(pieCounts::addFileCounts, errors::add));
+                .forEach(file -> {
+                    final Result<FileCounts, @NonNull Exception> result =
+                        context.require(countFileLinesAndCharacters.createTask(file.getPath()));
+                    result.ifElse(counts -> {
+                        pieCounts.addFileCounts(counts);
+                        final ResourceStringSupplier stringSupplier = new ResourceStringSupplier(file.getKey(),
+                            new ModifiedResourceStamper<@NonNull ReadableResource>(), StandardCharsets.UTF_8);
+                        if (context.require(isLibraryFile.createTask(new IsLibraryFile.Input(stringSupplier, input.ownModules)))) {
+                            pieLibraryCounts.addFileCounts(counts);
+                        }
+                    }, errors::add);
+                });
             if (!errors.isEmpty()) {
                 return Result.ofErr(new CompositeException(errors));
             }
-            return Result.ofOk(new ProjectCounts(javaCounts.toFileCounts(), pieCounts.toFileCounts()));
+            return Result.ofOk(new ProjectCounts(javaCounts.toFileCounts(), pieCounts.toFileCounts(), pieLibraryCounts.toFileCounts()));
         } catch(IOException e) {
             return Result.ofErr(e);
         }

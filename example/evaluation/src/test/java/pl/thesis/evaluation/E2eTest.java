@@ -6,13 +6,14 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import pl.thesis.evaluation.data.EvaluationResult;
 import pl.thesis.evaluation.data.FileCounts;
-import pl.thesis.evaluation.data.ProjectDirs;
+import pl.thesis.evaluation.data.Projects;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -43,7 +44,7 @@ public class E2eTest {
             getIntProperty(props, "charactersNoLayout")
         );
 
-        final ProjectDirs projects = new ProjectDirs(new FSPath(dir), new FSPath(dir), new FSPath(dir));
+        final Projects projects = new Projects(new FSPath(dir), new FSPath(dir), new FSPath(dir), Collections.emptyList());
         final FSPath resultFile = new FSPath(RESULT_FILE_DIR.resolve(dir.getFileName())).ensureLeafExtension("txt");
 
         @SuppressWarnings("NullableProblems") // Cannot find NonNull and error isn't used anyway, so just ignore

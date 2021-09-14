@@ -7,7 +7,7 @@ import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import pl.thesis.evaluation.data.ProjectEvaluationResult;
 
-public class EvaluateProject implements TaskDef<@NonNull ResourcePath, @NonNull Result<@NonNull ProjectEvaluationResult, @NonNull Exception>> {
+public class EvaluateProject implements TaskDef<@NonNull CountArgs, @NonNull Result<@NonNull ProjectEvaluationResult, @NonNull Exception>> {
     @NonNull private final CountLinesAndCharacters countLinesAndCharacters;
     @NonNull private final CountTasks countTasks;
 
@@ -24,10 +24,10 @@ public class EvaluateProject implements TaskDef<@NonNull ResourcePath, @NonNull 
 
     @Override
     @NonNull
-    public Result<@NonNull ProjectEvaluationResult, @NonNull Exception> exec(@NonNull ExecContext context, @NonNull ResourcePath input) {
+    public Result<@NonNull ProjectEvaluationResult, @NonNull Exception> exec(@NonNull ExecContext context, @NonNull CountArgs input) {
         return Result.ofOkOrCatching(() -> new ProjectEvaluationResult(
             context.require(countLinesAndCharacters.createTask(input)).unwrap(),
-            context.require(countTasks.createTask(input)).unwrap()
+            context.require(countTasks.createTask(input.dir)).unwrap()
         ), Exception.class);
     }
 }

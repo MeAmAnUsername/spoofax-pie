@@ -2,25 +2,33 @@ package pl.thesis.evaluation.data;
 
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import pl.thesis.evaluation.tasks.CountArgs;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Objects;
 
-public class ProjectDirs implements Serializable {
-    @NonNull public final ResourcePath javaProject;
-    @NonNull public final ResourcePath oldPieProject;
-    @NonNull public final ResourcePath newPieProject;
+public class Projects implements Serializable {
+    @NonNull public final CountArgs javaProject;
+    @NonNull public final CountArgs oldPieProject;
+    @NonNull public final CountArgs newPieProject;
 
-    public ProjectDirs(@NonNull ResourcePath javaProject, @NonNull ResourcePath oldPieProject, @NonNull ResourcePath newPieProject) {
+    public Projects(@NonNull CountArgs javaProject, @NonNull CountArgs oldPieProject, @NonNull CountArgs newPieProject) {
         this.javaProject = javaProject;
         this.oldPieProject = oldPieProject;
         this.newPieProject = newPieProject;
     }
 
+    public Projects(@NonNull ResourcePath javaProject, @NonNull ResourcePath oldPieProject, @NonNull ResourcePath newPieProject, Collection<String> ownModules) {
+        this.javaProject = new CountArgs(javaProject, ownModules);
+        this.oldPieProject = new CountArgs(oldPieProject, ownModules);
+        this.newPieProject = new CountArgs(newPieProject, ownModules);
+    }
+
     @Override public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        ProjectDirs that = (ProjectDirs)o;
+        Projects that = (Projects)o;
         return javaProject.equals(that.javaProject) && oldPieProject.equals(that.oldPieProject) && newPieProject.equals(that.newPieProject);
     }
 

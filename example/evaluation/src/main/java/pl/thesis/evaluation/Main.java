@@ -27,11 +27,14 @@ import pl.thesis.evaluation.tasks.CountTasks;
 import pl.thesis.evaluation.tasks.EvaluateCaseStudy;
 import pl.thesis.evaluation.tasks.EvaluateProject;
 import pl.thesis.evaluation.data.EvaluationResult;
+import pl.thesis.evaluation.tasks.IsLibraryFile;
 import pl.thesis.evaluation.tasks.IsTaskDef;
-import pl.thesis.evaluation.data.ProjectDirs;
+import pl.thesis.evaluation.data.Projects;
 import pl.thesis.evaluation.tasks.WriteEvaluationResultToFile;
 
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Collections;
 
 public class Main {
     public static void main(String[] args) {
@@ -40,7 +43,9 @@ public class Main {
         FSPath newPieDir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.newpie.spoofax", "src", "main"));
         FSPath resultFile = new FSPath(Paths.get("build", "reports", "case_study_evaluation.txt"));
 
-        final ProjectDirs projects = new ProjectDirs(javaDir, oldPieDir, newPieDir);
+        Collection<String> ownModules = Collections.singleton("mb:tiger:spoofax");
+
+        final Projects projects = new Projects(javaDir, oldPieDir, newPieDir, ownModules);
         final Result<@NonNull EvaluationResult, @NonNull Exception> evaluationResult = evaluateProject(projects, resultFile);
         System.out.println("Done: " + evaluationResult);
         if (evaluationResult.isOk()) {
@@ -50,7 +55,7 @@ public class Main {
     }
 
     public static Result<@NonNull EvaluationResult, @NonNull Exception> evaluateProject(
-            @NonNull ProjectDirs projects, @Nullable ResourcePath resultFile) {
+        @NonNull Projects projects, @Nullable ResourcePath resultFile) {
         ResourceService resourceService = buildResourceService();
         TaskDefs taskDefs = buildTaskDefs(resourceService);
         Pie pie = new PieBuilderImpl()
@@ -79,7 +84,8 @@ public class Main {
 
     public static TaskDefs buildTaskDefs(ResourceService resourceService) {
         CountFileLinesAndCharacters countFileLinesAndCharacters = new CountFileLinesAndCharacters();
-        CountLinesAndCharacters countLinesAndCharacters = new CountLinesAndCharacters(countFileLinesAndCharacters);
+        IsLibraryFile isLibraryFile = new IsLibraryFile();
+        CountLinesAndCharacters countLinesAndCharacters = new CountLinesAndCharacters(countFileLinesAndCharacters, isLibraryFile);
         IsTaskDef isTaskDef = new IsTaskDef();
         CountTaskDefs countTaskDefs = new CountTaskDefs(isTaskDef);
         CountPieFileTasks countPieFileTasks = new CountPieFileTasks();
@@ -95,6 +101,7 @@ public class Main {
 
         return new MapTaskDefs(
             countFileLinesAndCharacters,
+            isLibraryFile,
             countLinesAndCharacters,
             isTaskDef,
             countTaskDefs,

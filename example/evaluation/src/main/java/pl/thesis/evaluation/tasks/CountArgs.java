@@ -13,6 +13,11 @@ public class CountArgs implements Serializable {
 
     public CountArgs(@NonNull ResourcePath dir, @NonNull Collection<String> ownModules) {
         this.dir = dir;
+        ownModules.forEach(name -> {
+            if (!name.matches("[a-zA-Z][a-zA-Z0-9_-]+(:[a-zA-Z][a-zA-Z0-9_-]+)*")) {
+                throw new IllegalArgumentException("Illegal qualified module name " + name);
+            }
+        });
         this.ownModules = ownModules;
     }
 

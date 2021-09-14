@@ -1,0 +1,3 @@
+module org:spoofax:interpreter:terms
+
+data IStrategoTerm = foreign java org.spoofax.interpreter.terms.IStrategoTerm {}

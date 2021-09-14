@@ -1,0 +1,4 @@
+module mb:common:style
+
+data StyleName = foreign java mb.common.style.StyleName {}
+func styleNameFromString(name: string) -> StyleName? = foreign java mb.common.style.StyleName#fromString

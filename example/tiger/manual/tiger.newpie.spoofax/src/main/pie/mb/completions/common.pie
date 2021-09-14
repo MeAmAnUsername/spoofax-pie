@@ -1,0 +1,12 @@
+module mb:completions:common
+
+import mb:common:style:StyleName
+import mb:common:util:ListView
+
+data CompletionProposal = foreign java mb.completions.common.CompletionProposal {}
+func createCompletionProposal(string, string, string, string, string, StyleName, ListView, bool) -> CompletionProposal =
+  foreign java constructor mb.completions.common.CompletionProposal
+
+data CompletionResult = foreign java mb.completions.common.CompletionResult {}
+func createCompletionResult(listView: ListView, bool) -> CompletionResult =
+  foreign java constructor mb.completions.common.CompletionResult

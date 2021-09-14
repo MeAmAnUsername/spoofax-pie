@@ -1,26 +1,11 @@
 module mb:tiger:spoofax:task:reusable
 
-data Term = foreign java org.spoofax.interpreter.terms.IStrategoTerm {}
+import mb:common:style:{StyleName, styleNameFromString}
+import mb:common:util:{ListView, createEmptyListView}
+import mb:completions:common:{CompletionProposal, createCompletionProposal, CompletionResult, createCompletionResult}
+import org:spoofax:interpreter:terms:IStrategoTerm as Term
 
-data StyleName = foreign java mb.common.style.StyleName {}
-func styleNameFromString(name: string) -> StyleName? = foreign java mb.common.style.StyleName#fromString
-
-data CompletionProposal = foreign java mb.completions.common.CompletionProposal {}
-func createCompletionProposal(string, string, string, string, string, StyleName, ListView, bool) -> CompletionProposal = foreign java constructor mb.completions.common.CompletionProposal
-
-data ListView = foreign java mb.common.util.ListView {}
-func createEmptyListView() -> ListView = foreign java mb.common.util.ListView#of
 func listViewOf(proposals: CompletionProposal*) -> ListView = foreign java mb.common.util.ListView#of
-
-data CompletionResult = foreign java mb.completions.common.CompletionResult {}
-func createCompletionResult(listView: ListView, bool) -> CompletionResult = foreign java constructor mb.completions.common.CompletionResult
-
-
-// todo: move to separate files
-//import mb:common:style:styleNameFromString
-//import mb:common:util:createEmptyListView
-//import mb:completions:common:{CompletionResult, createCompletionResult, createCompletionProposal}
-//import mb:spoofax:common:IStrategoTerm as Term
 
 func TigerCompleteTaskDef(astProvider: supplier<Term?>) -> CompletionResult? = {
   val maybeAst = (astProvider.get<>());

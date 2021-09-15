@@ -3,8 +3,8 @@ package pl.thesis.evaluation.tasks;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
-import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import pl.thesis.evaluation.data.CountArgs;
 import pl.thesis.evaluation.data.ProjectEvaluationResult;
 
 public class EvaluateProject implements TaskDef<@NonNull CountArgs, @NonNull Result<@NonNull ProjectEvaluationResult, @NonNull Exception>> {

@@ -2,7 +2,6 @@ package pl.thesis.evaluation.data;
 
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import pl.thesis.evaluation.tasks.CountArgs;
 
 import java.io.Serializable;
 import java.util.Collection;

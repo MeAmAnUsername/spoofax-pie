@@ -1,4 +1,4 @@
-package pl.thesis.evaluation.tasks;
+package pl.thesis.evaluation.data;
 
 import mb.resource.fs.FSPath;
 import mb.resource.hierarchical.ResourcePath;

@@ -1,4 +1,4 @@
-package pl.thesis.evaluation.tasks;
+package pl.thesis.evaluation.data;
 
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;

@@ -9,6 +9,7 @@ import mb.resource.ReadableResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import pl.thesis.evaluation.data.CountArgs;
 import pl.thesis.evaluation.data.FileCounts;
 import pl.thesis.evaluation.data.ProjectCounts;
 

@@ -48,7 +48,11 @@ public class IsLibraryFile implements TaskDef<IsLibraryFile.Input, @NonNull Bool
     public @NonNull Boolean exec(@NonNull ExecContext context, @NonNull Input input) {
         final String contents = context.require(input.contentsSupplier);
         assert contents != null;
-        return input.ownModules.stream()
+        return isLibraryFile(input.ownModules, contents);
+    }
+
+    public static boolean isLibraryFile(Collection<String> ownModules, String contents) {
+        return ownModules.stream()
             .map(name -> "module " + name)
             .noneMatch(contents::contains);
     }

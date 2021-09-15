@@ -1,6 +1,7 @@
 package pl.thesis.evaluation.tasks;
 
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import pl.thesis.evaluation.data.FileCounts;
 
@@ -17,6 +18,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CountFileLinesAndCharactersTest {
     public final Path UNIT_TESTS_FILE =
         Paths.get("src", "test", "resources", "CountFileLinesAndCharactersTestCases.txt");
+    public final Path PKG_PIE =
+        Paths.get("src", "test", "resources", "e2e-projects", "package", "org", "example", "pkg.pie");
+
+    @Test
+    public void multiLine() throws IOException {
+        String program = "module org:example:pkg\n" +
+            "\n" +
+            "func noop() -> unit = unit\n";
+        FileCounts expected = new FileCounts(4, 2, 51, 50);
+        FileCounts actual = new CountFileLinesAndCharacters().evaluateFile(new ByteArrayInputStream(program.getBytes()));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void multiLineFromFile() throws IOException {
+        FileCounts expected = new FileCounts(4, 2, 51, 50);
+        FileCounts actual = new CountFileLinesAndCharacters().evaluateFile(new ByteArrayInputStream(Files.readAllBytes(PKG_PIE)));
+        assertEquals(expected, actual);
+    }
 
     @TestFactory
     public Stream<DynamicTest> readUnitTests() throws IOException {

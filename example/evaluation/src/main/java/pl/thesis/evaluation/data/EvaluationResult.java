@@ -160,7 +160,7 @@ public class EvaluationResult implements Serializable {
             RowProducer.ofIntFunction("PIE DSL characters including libraries and layout" , result -> result.projectCounts.pieCounts.charsIncludingLayout),
             RowProducer.ofIntFunction("PIE DSL characters excluding libraries, including layout" , result -> result.projectCounts.pieCounts.charsIncludingLayout-result.projectCounts.pieLibraryCounts.charsIncludingLayout),
             RowProducer.ofIntFunction("PIE DSL characters including libraries, excluding layout" , result -> result.projectCounts.pieCounts.charsExcludingLayout),
-            RowProducer.ofIntFunction("PIE DSL characters excluding libraries and layout" , result -> result.projectCounts.pieCounts.charsExcludingLayout-result.projectCounts.pieLibraryCounts.linesExcludingLayout),
+            RowProducer.ofIntFunction("PIE DSL characters excluding libraries and layout" , result -> result.projectCounts.pieCounts.charsExcludingLayout-result.projectCounts.pieLibraryCounts.charsExcludingLayout),
             RowProducer.ofIntFunction("total characters including libraries and layout" , result -> result.projectCounts.javaCounts.charsIncludingLayout+result.projectCounts.pieCounts.charsIncludingLayout),
             RowProducer.ofIntFunction("total characters excluding libraries, including layout" , result -> result.projectCounts.javaCounts.charsIncludingLayout+result.projectCounts.pieCounts.charsIncludingLayout-result.projectCounts.pieLibraryCounts.charsIncludingLayout),
             RowProducer.ofIntFunction("total characters including libraries, excluding layout" , result -> result.projectCounts.javaCounts.charsExcludingLayout+result.projectCounts.pieCounts.charsExcludingLayout),

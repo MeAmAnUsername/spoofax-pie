@@ -129,7 +129,7 @@ public class EvaluationResult implements Serializable {
     }
 
     private List<Column> getColumns() {
-        final Column[] columns = {
+        return Arrays.asList(
             new Column("value", 56, rowProducer -> rowProducer.name, true),
             new Column("Java", 5, rowProducer -> Column.singleVal(rowProducer, javaResult), false),
             new Column("old PIE DSL", 11, rowProducer -> Column.singleVal(rowProducer, oldPieResult), false),
@@ -137,13 +137,12 @@ public class EvaluationResult implements Serializable {
             new Column("Java vs. DSL", 12, rowProducer -> Column.absoluteDiff(rowProducer, newPieResult, javaResult), false),
             new Column("Java vs. DSL (%)", 16, rowProducer -> Column.percentageDiff(rowProducer, javaResult, newPieResult), false),
             new Column("old vs. new", 11, rowProducer -> Column.absoluteDiff(rowProducer, newPieResult, oldPieResult), false),
-            new Column("old vs. new (%)", 15, rowProducer -> Column.percentageDiff(rowProducer, oldPieResult, newPieResult), false),
-        };
-        return Arrays.asList(columns);
+            new Column("old vs. new (%)", 15, rowProducer -> Column.percentageDiff(rowProducer, oldPieResult, newPieResult), false)
+        );
     }
 
     private List<Row> getRows() {
-        final Row[] rows = {
+        return Arrays.asList(
             RowProducer.ofIntFunction("java lines including layout", result -> result.projectCounts.javaCounts.linesIncludingLayout),
             RowProducer.ofIntFunction("java lines excluding layout", result -> result.projectCounts.javaCounts.linesExcludingLayout),
             RowProducer.ofIntFunction("PIE DSL lines including libraries and layout" , result -> result.projectCounts.pieCounts.linesIncludingLayout),
@@ -170,9 +169,8 @@ public class EvaluationResult implements Serializable {
             RowProducer.ofIntFunction("tasks fully implemented in PIE DSL" , result -> result.taskCounts.pieTasks-result.taskCounts.pieTasksWithHelperFunction),
             RowProducer.ofIntFunction("tasks implemented in PIE DSL with helper function" , result -> result.taskCounts.pieTasksWithHelperFunction),
             RowProducer.ofIntFunction("total tasks implemented in PIE DSL" , result -> result.taskCounts.pieTasks),
-            RowProducer.ofIntFunction("total tasks" , result -> result.taskCounts.javaTasks+result.taskCounts.pieTasks),
-        };
-        return Arrays.asList(rows);
+            RowProducer.ofIntFunction("total tasks" , result -> result.taskCounts.javaTasks+result.taskCounts.pieTasks)
+        );
     }
 
     private static class Column {

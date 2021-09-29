@@ -9,6 +9,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import pl.thesis.evaluation.data.EvaluationResult;
+import pl.thesis.evaluation.formatter.ResultFormatter;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -16,30 +17,33 @@ import java.util.Objects;
 
 public class WriteEvaluationResultToFile implements TaskDef<WriteEvaluationResultToFile.@NonNull Input, @NonNull None> {
     public static class Input implements Serializable {
-        @NonNull public final EvaluationResult evaluationResult;
+        @NonNull public final ResultFormatter formatter;
         @NonNull public final ResourcePath file;
+        @NonNull public final EvaluationResult evaluationResult;
 
-        public Input(@NonNull EvaluationResult evaluationResult, @NonNull ResourcePath file) {
-            this.evaluationResult = evaluationResult;
+        public Input(@NonNull ResultFormatter formatter, @NonNull ResourcePath file, @NonNull EvaluationResult evaluationResult) {
+            this.formatter = formatter;
             this.file = file;
+            this.evaluationResult = evaluationResult;
         }
 
         @Override public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
-            return evaluationResult.equals(input.evaluationResult) && file.equals(input.file);
+            return formatter.equals(input.formatter) && file.equals(input.file) && evaluationResult.equals(input.evaluationResult);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(evaluationResult, file);
+            return Objects.hash(formatter, file, evaluationResult);
         }
 
         @Override public String toString() {
             return "Input{" +
-                "evaluationResult=" + evaluationResult +
+                "formatter=" + formatter +
                 ", file=" + file +
+                ", evaluationResult=" + evaluationResult +
                 '}';
         }
     }
@@ -60,10 +64,8 @@ public class WriteEvaluationResultToFile implements TaskDef<WriteEvaluationResul
     public @NonNull None exec(@NonNull ExecContext context, @NonNull Input input) throws Exception {
         final HierarchicalResource file = resourceService.getHierarchicalResource(input.file);
         file.ensureFileExists();
-        file.writeString(input.evaluationResult.formatAsTable(), StandardCharsets.UTF_8);
+        file.writeString(input.formatter.format(input.evaluationResult), StandardCharsets.UTF_8);
         context.provide(file, ResourceStampers.hashFile());
         return None.instance;
     }
-
-
 }

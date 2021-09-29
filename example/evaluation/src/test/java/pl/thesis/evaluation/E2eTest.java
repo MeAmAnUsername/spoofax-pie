@@ -72,7 +72,7 @@ public class E2eTest {
         final FSPath resultFile = new FSPath(RESULT_FILE_DIR.resolve(dir.getFileName())).ensureLeafExtension("txt");
 
         @SuppressWarnings("NullableProblems") // Cannot find NonNull and error isn't used anyway, so just ignore
-        Result<EvaluationResult, ?> result = Main.evaluateProject(projects, resultFile);
+        Result<EvaluationResult, ?> result = Main.evaluateProject(projects, resultFile, null);
         ProjectCounts actual = result.unwrap().javaResult.projectCounts;
         assertEquals(expected, actual);
         assertTrue(Files.exists(resultFile.getJavaPath()));

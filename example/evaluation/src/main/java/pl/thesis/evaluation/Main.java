@@ -16,6 +16,8 @@ import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import pl.thesis.evaluation.formatter.LatexTableResultFormatter;
+import pl.thesis.evaluation.formatter.TextTableResultFormatter;
 import pl.thesis.evaluation.tasks.CountLinesAndCharacters;
 import pl.thesis.evaluation.tasks.CountFileLinesAndCharacters;
 import pl.thesis.evaluation.tasks.CountPieFileTasks;
@@ -32,9 +34,13 @@ import pl.thesis.evaluation.tasks.IsTaskDef;
 import pl.thesis.evaluation.data.Projects;
 import pl.thesis.evaluation.tasks.WriteEvaluationResultToFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Properties;
 
 public class Main {
     public static void main(String[] args) {
@@ -43,10 +49,21 @@ public class Main {
         FSPath newPieDir = new FSPath(Paths.get("..", "tiger", "manual", "tiger.newpie.spoofax", "src", "main"));
         FSPath resultFile = new FSPath(Paths.get("build", "reports", "case_study_evaluation.txt"));
 
+        Properties properties = new Properties();
+        Path propFile = Paths.get("config/config.properties");
+        try {
+            properties.load(Files.newInputStream(propFile));
+        } catch(IOException e) {
+            System.err.println("Could not create properties from " + propFile + ": " + e);
+            e.printStackTrace();
+        }
+        FSPath latexFile = new FSPath(properties.getProperty("resultFiles.latex"));
+
         Collection<String> ownModules = Collections.singleton("mb:tiger:spoofax");
 
         final Projects projects = new Projects(javaDir, oldPieDir, newPieDir, ownModules);
-        final Result<@NonNull EvaluationResult, @NonNull Exception> evaluationResult = evaluateProject(projects, resultFile);
+        final Result<@NonNull EvaluationResult, @NonNull Exception> evaluationResult =
+            evaluateProject(projects, resultFile, latexFile);
         System.out.println("Done: " + evaluationResult);
         if (evaluationResult.isOk()) {
             //noinspection ConstantConditions
@@ -55,7 +72,7 @@ public class Main {
     }
 
     public static Result<@NonNull EvaluationResult, @NonNull Exception> evaluateProject(
-        @NonNull Projects projects, @Nullable ResourcePath resultFile) {
+        @NonNull Projects projects, @Nullable ResourcePath resultFile, @Nullable ResourcePath latexFile) {
         ResourceService resourceService = buildResourceService();
         TaskDefs taskDefs = buildTaskDefs(resourceService);
         Pie pie = new PieBuilderImpl()
@@ -66,10 +83,17 @@ public class Main {
 
         try(MixedSession session = pie.newSession()) {
             final Result<@NonNull EvaluationResult, @NonNull Exception> result = session.require(evaluate.createTask(projects));
-            if (resultFile != null && result.isOk()) {
+            assert result != null;
+            if(result.isOk()) {
                 WriteEvaluationResultToFile write = getTaskDef(taskDefs, WriteEvaluationResultToFile.class);
-                //noinspection ConstantConditions
-                session.require(write.createTask(new WriteEvaluationResultToFile.Input(result.get(), resultFile)));
+                if(resultFile != null) {
+                    //noinspection ConstantConditions
+                    session.require(write.createTask(new WriteEvaluationResultToFile.Input(new TextTableResultFormatter(), resultFile, result.get())));
+                }
+                if(latexFile != null) {
+                    //noinspection ConstantConditions
+                    session.require(write.createTask(new WriteEvaluationResultToFile.Input(new LatexTableResultFormatter(), latexFile, result.get())));
+                }
             }
             return result;
         } catch(ExecException | InterruptedException | NullPointerException e) {

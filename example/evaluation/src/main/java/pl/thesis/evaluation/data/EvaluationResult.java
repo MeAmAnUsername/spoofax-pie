@@ -153,6 +153,7 @@ public class EvaluationResult implements Serializable {
             RowProducer.ofIntFunction("total lines excluding libraries, including layout" , result -> result.projectCounts.javaCounts.linesIncludingLayout+result.projectCounts.pieCounts.linesIncludingLayout-result.projectCounts.pieLibraryCounts.linesIncludingLayout),
             RowProducer.ofIntFunction("total lines including libraries, excluding layout" , result -> result.projectCounts.javaCounts.linesExcludingLayout+result.projectCounts.pieCounts.linesExcludingLayout),
             RowProducer.ofIntFunction("total lines excluding libraries and layout" , result -> result.projectCounts.javaCounts.linesExcludingLayout+result.projectCounts.pieCounts.linesExcludingLayout-result.projectCounts.pieLibraryCounts.linesExcludingLayout),
+            // todo: also count lines for tasks only (i.e. src/main/java/mb.tiger.spoofax.task)
             new SeparatorRow(),
             RowProducer.ofIntFunction("java characters including layout", result -> result.projectCounts.javaCounts.charsIncludingLayout),
             RowProducer.ofIntFunction("java characters excluding layout", result -> result.projectCounts.javaCounts.charsExcludingLayout),
@@ -164,12 +165,14 @@ public class EvaluationResult implements Serializable {
             RowProducer.ofIntFunction("total characters excluding libraries, including layout" , result -> result.projectCounts.javaCounts.charsIncludingLayout+result.projectCounts.pieCounts.charsIncludingLayout-result.projectCounts.pieLibraryCounts.charsIncludingLayout),
             RowProducer.ofIntFunction("total characters including libraries, excluding layout" , result -> result.projectCounts.javaCounts.charsExcludingLayout+result.projectCounts.pieCounts.charsExcludingLayout),
             RowProducer.ofIntFunction("total characters excluding libraries and layout" , result -> result.projectCounts.javaCounts.charsExcludingLayout+result.projectCounts.pieCounts.charsExcludingLayout-result.projectCounts.pieLibraryCounts.charsExcludingLayout),
+            // todo: also count characters for tasks only (i.e. src/main/java/mb.tiger.spoofax.task)
             new SeparatorRow(),
             RowProducer.ofIntFunction("tasks implemented in java" , result -> result.taskCounts.javaTasks),
             RowProducer.ofIntFunction("tasks fully implemented in PIE DSL" , result -> result.taskCounts.pieTasks-result.taskCounts.pieTasksWithHelperFunction),
             RowProducer.ofIntFunction("tasks implemented in PIE DSL with helper function" , result -> result.taskCounts.pieTasksWithHelperFunction),
             RowProducer.ofIntFunction("total tasks implemented in PIE DSL" , result -> result.taskCounts.pieTasks),
             RowProducer.ofIntFunction("total tasks" , result -> result.taskCounts.javaTasks+result.taskCounts.pieTasks)
+            // todo: foreign java tasks in libraries
         );
     }
 

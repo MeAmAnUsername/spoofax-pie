@@ -11,20 +11,17 @@ public class TextTableResultFormatter implements ResultFormatter {
 
     @Override
     public @NonNull String format(@NonNull EvaluationResult evaluationResult) {
-        final int indentation = 2;
-
-        StringBuilder sb = new StringBuilder();
-        ResultFormatter.appendSpaces(sb, indentation);
-        sb.append("| ");
-        final String rowStart = sb.toString();
+        final String indentation = "  ";
+        final String rowStart = indentation + "| ";
         final String separator = " | ";
         final String rowEnd = " |\n";
+        final String preamble = "Evaluation result\n";
 
         final List<Column> columns = getColumns(evaluationResult);
 
         // separatorRow
-        sb = new StringBuilder();
-        ResultFormatter.appendSpaces(sb, indentation);
+        StringBuilder sb = new StringBuilder();
+        sb.append(indentation);
         sb.append("|-");
         AtomicBoolean first = new AtomicBoolean(true);
         for(Column column : columns) {
@@ -37,42 +34,7 @@ public class TextTableResultFormatter implements ResultFormatter {
         sb.append("-|\n");
         final String separatorRow = sb.toString();
 
-        // header
-        sb = new StringBuilder("Evaluation result\n");
-        sb.append(separatorRow);
-        sb.append(rowStart);
-        first.set(true);
-        for(Column column : columns) {
-            if (!first.get()) {
-                sb.append(separator);
-            }
-            column.appendHeader(sb);
-            first.set(false);
-        }
-        sb.append(rowEnd);
-        sb.append(separatorRow);
-
-        // rest of the table
-        for(Row row : ResultFormatter.getRows()) {
-            if (row instanceof SeparatorRow) {
-                sb.append(separatorRow);
-                continue;
-            }
-            RowProducer rowProducer = (RowProducer)row;
-            sb.append(rowStart);
-            first.set(true);
-            for(Column column : columns) {
-                if (!first.get()) {
-                    sb.append(separator);
-                }
-                column.appendCell(sb, rowProducer);
-                first.set(false);
-            }
-            sb.append(rowEnd);
-        }
-
-        sb.append(separatorRow);
-        return sb.toString();
+        return ResultFormatter.formatTable(rowStart, separator, rowEnd, separatorRow, preamble, "", columns);
     }
 
     static List<Column> getColumns(EvaluationResult evaluationResult) {

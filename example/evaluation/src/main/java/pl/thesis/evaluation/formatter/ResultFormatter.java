@@ -6,6 +6,7 @@ import pl.thesis.evaluation.data.ProjectEvaluationResult;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import static pl.thesis.evaluation.formatter.ResultFormatter.RowProducer.ofIntFunction;
@@ -48,6 +49,52 @@ public interface ResultFormatter {
         );
     }
 
+    static String formatTable(String rowStart,
+                              String separator,
+                              String rowEnd,
+                              String separatorRow,
+                              String preamble,
+                              String postamble,
+                              Iterable<Column> columns) {
+        StringBuilder sb = new StringBuilder();
+        AtomicBoolean first = new AtomicBoolean(true);
+
+        sb.append(preamble);
+        sb.append(separatorRow);
+        sb.append(rowStart);
+        for(Column column : columns) {
+            if(!first.get()) {
+                sb.append(separator);
+            }
+            column.appendHeader(sb);
+            first.set(false);
+        }
+        sb.append(rowEnd);
+        sb.append(separatorRow);
+
+        // rest of the table
+        for(Row row : ResultFormatter.getRows()) {
+            if(row instanceof SeparatorRow) {
+                sb.append(separatorRow);
+                continue;
+            }
+            RowProducer rowProducer = (RowProducer)row;
+            sb.append(rowStart);
+            first.set(true);
+            for(Column column : columns) {
+                if(!first.get()) {
+                    sb.append(separator);
+                }
+                column.appendCell(sb, rowProducer);
+                first.set(false);
+            }
+            sb.append(rowEnd);
+        }
+
+        sb.append(separatorRow);
+        sb.append(postamble);
+        return sb.toString();
+    }
 
     static void appendPaddedString(StringBuilder sb, String str, int totalLength, boolean alignLeft) {
         if (alignLeft) {

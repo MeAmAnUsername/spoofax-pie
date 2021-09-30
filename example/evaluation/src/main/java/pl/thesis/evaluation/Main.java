@@ -67,7 +67,7 @@ public class Main {
         System.out.println("Done: " + evaluationResult);
         if (evaluationResult.isOk()) {
             //noinspection ConstantConditions
-            System.out.println(evaluationResult.get().formatAsTable());
+            System.out.println(new TextTableResultFormatter().format(evaluationResult.get()));
         }
     }
 

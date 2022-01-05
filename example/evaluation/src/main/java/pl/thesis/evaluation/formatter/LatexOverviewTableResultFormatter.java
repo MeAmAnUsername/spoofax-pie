@@ -33,13 +33,13 @@ public class LatexOverviewTableResultFormatter implements ResultFormatter {
     public List<Row> getRows() {
         return Arrays.asList(
             ofIntFunction("total lines including libraries and layout" , result -> result.projectCounts.javaCounts.linesIncludingLayout+result.projectCounts.pieCounts.linesIncludingLayout),
-            ofIntFunction("total lines excluding libraries, including layout" , result -> result.projectCounts.javaCounts.linesIncludingLayout+result.projectCounts.pieCounts.linesIncludingLayout-result.projectCounts.pieLibraryCounts.linesIncludingLayout),
             ofIntFunction("total lines including libraries, excluding layout" , result -> result.projectCounts.javaCounts.linesExcludingLayout+result.projectCounts.pieCounts.linesExcludingLayout),
+            ofIntFunction("total lines excluding libraries, including layout" , result -> result.projectCounts.javaCounts.linesIncludingLayout+result.projectCounts.pieCounts.linesIncludingLayout-result.projectCounts.pieLibraryCounts.linesIncludingLayout),
             ofIntFunction("total lines excluding libraries and layout" , result -> result.projectCounts.javaCounts.linesExcludingLayout+result.projectCounts.pieCounts.linesExcludingLayout-result.projectCounts.pieLibraryCounts.linesExcludingLayout),
             new ResultFormatter.SeparatorRow(),
             ofIntFunction("total characters including libraries and layout" , result -> result.projectCounts.javaCounts.charsIncludingLayout+result.projectCounts.pieCounts.charsIncludingLayout),
-            ofIntFunction("total characters excluding libraries, including layout" , result -> result.projectCounts.javaCounts.charsIncludingLayout+result.projectCounts.pieCounts.charsIncludingLayout-result.projectCounts.pieLibraryCounts.charsIncludingLayout),
             ofIntFunction("total characters including libraries, excluding layout" , result -> result.projectCounts.javaCounts.charsExcludingLayout+result.projectCounts.pieCounts.charsExcludingLayout),
+            ofIntFunction("total characters excluding libraries, including layout" , result -> result.projectCounts.javaCounts.charsIncludingLayout+result.projectCounts.pieCounts.charsIncludingLayout-result.projectCounts.pieLibraryCounts.charsIncludingLayout),
             ofIntFunction("total characters excluding libraries and layout" , result -> result.projectCounts.javaCounts.charsExcludingLayout+result.projectCounts.pieCounts.charsExcludingLayout-result.projectCounts.pieLibraryCounts.charsExcludingLayout)
         );
     }

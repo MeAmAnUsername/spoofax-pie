@@ -16,7 +16,7 @@ public class LatexOverviewTableResultFormatter implements ResultFormatter {
         final String rowEnd = " \\\\\n";
         //noinspection SpellCheckingInspection  hline is a Latex command
         final String separatorRow = rowStart + "\\hline\n";
-        String preamble = "\\begin{tabular}{ |l|c|c| }\n";
+        String preamble = "\\begin{tabular}{ |l|r|r| }\n";
         String postamble = "\\end{tabular}\n";
         final List<Column> columns = getColumns(evaluationResult);
         final List<ResultFormatter.Row> rows = getRows();

@@ -6,6 +6,7 @@ import pl.thesis.evaluation.data.ProjectEvaluationResult;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
@@ -14,7 +15,7 @@ import static pl.thesis.evaluation.formatter.ResultFormatter.RowProducer.ofIntFu
 public interface ResultFormatter {
     @NonNull String format(@NonNull EvaluationResult evaluationResult);
 
-    static List<ResultFormatter.Row> getRows() {
+    default List<ResultFormatter.Row> getRows() {
         return Arrays.asList(
             ofIntFunction("java lines including layout", result -> result.projectCounts.javaCounts.linesIncludingLayout),
             ofIntFunction("java lines excluding layout", result -> result.projectCounts.javaCounts.linesExcludingLayout),
@@ -55,7 +56,8 @@ public interface ResultFormatter {
                               String separatorRow,
                               String preamble,
                               String postamble,
-                              Iterable<Column> columns) {
+                              Iterable<Column> columns,
+                              Iterable<ResultFormatter.Row> rows) {
         StringBuilder sb = new StringBuilder();
         AtomicBoolean first = new AtomicBoolean(true);
 
@@ -73,7 +75,7 @@ public interface ResultFormatter {
         sb.append(separatorRow);
 
         // rest of the table
-        for(Row row : ResultFormatter.getRows()) {
+        for(Row row : rows) {
             if(row instanceof SeparatorRow) {
                 sb.append(separatorRow);
                 continue;
@@ -151,7 +153,7 @@ public interface ResultFormatter {
                 }
                 percentage = 0.0;
             }
-            return String.format("%c%2.2f %%", percentage > 0.0 ? '+' : ' ' , percentage);
+            return String.format(Locale.US, "%c%2.2f %%", percentage > 0.0 ? '+' : ' ' , percentage);
         }
 
         public static String absoluteDiff(RowProducer rowProducer, ProjectEvaluationResult newResult, ProjectEvaluationResult baselineResult) {

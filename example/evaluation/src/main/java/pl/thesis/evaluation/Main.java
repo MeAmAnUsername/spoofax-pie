@@ -16,6 +16,8 @@ import mb.resource.fs.FSResourceRegistry;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import pl.thesis.evaluation.data.OutputFile;
+import pl.thesis.evaluation.formatter.LatexOverviewTableResultFormatter;
 import pl.thesis.evaluation.formatter.LatexTableResultFormatter;
 import pl.thesis.evaluation.formatter.TextTableResultFormatter;
 import pl.thesis.evaluation.tasks.CountLinesAndCharacters;
@@ -38,8 +40,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 public class Main {
@@ -58,12 +62,18 @@ public class Main {
             e.printStackTrace();
         }
         FSPath latexFile = new FSPath(properties.getProperty("resultFiles.latex"));
+        FSPath latexOverviewFile = new FSPath(properties.getProperty("resultFiles.latexOverview"));
 
         Collection<String> ownModules = Collections.singleton("mb:tiger:spoofax");
 
         final Projects projects = new Projects(javaDir, oldPieDir, newPieDir, ownModules);
+        final List<OutputFile> outputFiles = Arrays.asList(
+            new OutputFile(resultFile, new TextTableResultFormatter()),
+            new OutputFile(latexFile, new LatexTableResultFormatter()),
+            new OutputFile(latexOverviewFile, new LatexOverviewTableResultFormatter())
+        );
         final Result<@NonNull EvaluationResult, @NonNull Exception> evaluationResult =
-            evaluateProject(projects, resultFile, latexFile);
+            evaluateProject(projects, outputFiles);
         System.out.println("Done: " + evaluationResult);
         if (evaluationResult.isOk()) {
             //noinspection ConstantConditions
@@ -72,7 +82,9 @@ public class Main {
     }
 
     public static Result<@NonNull EvaluationResult, @NonNull Exception> evaluateProject(
-        @NonNull Projects projects, @Nullable ResourcePath resultFile, @Nullable ResourcePath latexFile) {
+        @NonNull Projects projects,
+        Iterable<OutputFile> outputFiles
+    ) {
         ResourceService resourceService = buildResourceService();
         TaskDefs taskDefs = buildTaskDefs(resourceService);
         Pie pie = new PieBuilderImpl()
@@ -86,13 +98,9 @@ public class Main {
             assert result != null;
             if(result.isOk()) {
                 WriteEvaluationResultToFile write = getTaskDef(taskDefs, WriteEvaluationResultToFile.class);
-                if(resultFile != null) {
+                for (OutputFile outputFile : outputFiles) {
                     //noinspection ConstantConditions
-                    session.require(write.createTask(new WriteEvaluationResultToFile.Input(new TextTableResultFormatter(), resultFile, result.get())));
-                }
-                if(latexFile != null) {
-                    //noinspection ConstantConditions
-                    session.require(write.createTask(new WriteEvaluationResultToFile.Input(new LatexTableResultFormatter(), latexFile, result.get())));
+                    session.require(write.createTask(new WriteEvaluationResultToFile.Input(outputFile.formatter, outputFile.file, result.get())));
                 }
             }
             return result;

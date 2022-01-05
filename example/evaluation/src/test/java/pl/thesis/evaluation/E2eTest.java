@@ -6,8 +6,10 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import pl.thesis.evaluation.data.EvaluationResult;
 import pl.thesis.evaluation.data.FileCounts;
+import pl.thesis.evaluation.data.OutputFile;
 import pl.thesis.evaluation.data.ProjectCounts;
 import pl.thesis.evaluation.data.Projects;
+import pl.thesis.evaluation.formatter.TextTableResultFormatter;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,8 +74,9 @@ public class E2eTest {
         final Projects projects = new Projects(new FSPath(dir), new FSPath(dir), new FSPath(dir), ownModules);
         final FSPath resultFile = new FSPath(RESULT_FILE_DIR.resolve(dir.getFileName())).ensureLeafExtension("txt");
 
+        final Set<OutputFile> outputFiles = Collections.singleton(new OutputFile(resultFile, new TextTableResultFormatter()));
         @SuppressWarnings("NullableProblems") // Cannot find NonNull and error isn't used anyway, so just ignore
-        Result<EvaluationResult, ?> result = Main.evaluateProject(projects, resultFile, null);
+        Result<EvaluationResult, ?> result = Main.evaluateProject(projects, outputFiles);
         ProjectCounts actual = result.unwrap().javaResult.projectCounts;
         assertEquals(expected, actual);
         assertTrue(Files.exists(resultFile.getJavaPath()));

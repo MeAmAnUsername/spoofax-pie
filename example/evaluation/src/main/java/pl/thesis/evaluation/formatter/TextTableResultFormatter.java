@@ -34,19 +34,20 @@ public class TextTableResultFormatter implements ResultFormatter {
         sb.append("-|\n");
         final String separatorRow = sb.toString();
 
-        return ResultFormatter.formatTable(rowStart, separator, rowEnd, separatorRow, preamble, "", columns);
+        final List<ResultFormatter.Row> rows = getRows();
+        return ResultFormatter.formatTable(rowStart, separator, rowEnd, separatorRow, preamble, "", columns, rows);
     }
 
     static List<Column> getColumns(EvaluationResult evaluationResult) {
         return Arrays.asList(
-            new Column("value", 56, rowProducer -> rowProducer.name, true),
+            new Column("Value", 56, rowProducer -> rowProducer.name, true),
             new Column("Java", 5, rowProducer -> Column.singleVal(rowProducer, evaluationResult.javaResult), false),
-            new Column("old PIE DSL", 11, rowProducer -> Column.singleVal(rowProducer, evaluationResult.oldPieResult), false),
-            new Column("new PIE DSL", 11, rowProducer -> Column.singleVal(rowProducer, evaluationResult.newPieResult), false),
+            new Column("Old PIE DSL", 11, rowProducer -> Column.singleVal(rowProducer, evaluationResult.oldPieResult), false),
+            new Column("New PIE DSL", 11, rowProducer -> Column.singleVal(rowProducer, evaluationResult.newPieResult), false),
             new Column("Java vs. DSL", 12, rowProducer -> Column.absoluteDiff(rowProducer, evaluationResult.newPieResult, evaluationResult.javaResult), false),
             new Column("Java vs. DSL (%)", 16, rowProducer -> Column.percentageDiff(rowProducer, evaluationResult.javaResult, evaluationResult.newPieResult), false),
-            new Column("old vs. new", 11, rowProducer -> Column.absoluteDiff(rowProducer, evaluationResult.newPieResult, evaluationResult.oldPieResult), false),
-            new Column("old vs. new (%)", 15, rowProducer -> Column.percentageDiff(rowProducer, evaluationResult.oldPieResult, evaluationResult.newPieResult), false)
+            new Column("Old vs. new", 11, rowProducer -> Column.absoluteDiff(rowProducer, evaluationResult.newPieResult, evaluationResult.oldPieResult), false),
+            new Column("Old vs. new (%)", 15, rowProducer -> Column.percentageDiff(rowProducer, evaluationResult.oldPieResult, evaluationResult.newPieResult), false)
         );
     }
 }

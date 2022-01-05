@@ -3,6 +3,13 @@ rootProject.name = "spoofax3.root"
 pluginManagement {
   repositories {
     maven("https://artifacts.metaborg.org/content/groups/public/")
+    maven {
+      url = uri("https://mirror.dkm.cz/eclipse//technology/epp/downloads/release/")
+      content {
+        // disable this repository because it does not contain
+        excludeGroupByRegex(".*")
+      }
+    }
   }
 }
 

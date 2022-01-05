@@ -11,7 +11,6 @@ func TigerCompleteTaskDef(astProvider: supplier<Term?>) -> CompletionResult? = {
   val maybeAst = (astProvider.get<>());
   if (maybeAst == null)
     return null;
-  val ast = maybeAst!;
   createCompletionResult(listViewOf([
     createCompletionProposal("mypackage", "description", "", "", "mypackage", styleNameFromString("meta.package")!, createEmptyListView(), false),
     createCompletionProposal("myclass", "description", "", "T", "mypackage", styleNameFromString("meta.class")!, createEmptyListView(), false)

@@ -16,7 +16,7 @@ public class LatexOverviewTableResultFormatter implements ResultFormatter {
         final String rowEnd = " \\\\\n";
         //noinspection SpellCheckingInspection  hline is a Latex command
         final String separatorRow = rowStart + "\\hline\n";
-        String preamble = "\\begin{tabular}{ |l|c| }\n";
+        String preamble = "\\begin{tabular}{ |l|c|c| }\n";
         String postamble = "\\end{tabular}\n";
         final List<Column> columns = getColumns(evaluationResult);
         final List<ResultFormatter.Row> rows = getRows();
@@ -26,6 +26,7 @@ public class LatexOverviewTableResultFormatter implements ResultFormatter {
     public List<Column> getColumns(EvaluationResult evaluationResult) {
         return Arrays.asList(
             new Column("Value", 56, rowProducer -> rowProducer.name, true),
+            new Column("Difference", 10, rowProducer -> Column.absoluteDiff(rowProducer, evaluationResult.newPieResult, evaluationResult.javaResult), false),
             new Column("Difference (\\%)", 15, rowProducer -> escapePercent(Column.percentageDiff(rowProducer, evaluationResult.javaResult, evaluationResult.newPieResult)), false)
         );
     }

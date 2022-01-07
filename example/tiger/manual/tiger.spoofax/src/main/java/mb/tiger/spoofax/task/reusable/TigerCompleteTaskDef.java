@@ -12,7 +12,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
-import java.io.Serializable;
 import java.util.Objects;
 
 @TigerScope

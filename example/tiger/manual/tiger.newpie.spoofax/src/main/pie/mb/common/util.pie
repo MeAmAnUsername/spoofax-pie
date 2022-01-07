@@ -1,6 +1,4 @@
 module mb:common:util
 
-import mb:completions:common:CompletionProposal
-
 data ListView = foreign java mb.common.util.ListView {}
 func createEmptyListView() -> ListView = foreign java mb.common.util.ListView#of

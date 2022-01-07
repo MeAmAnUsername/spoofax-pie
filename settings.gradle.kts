@@ -6,7 +6,7 @@ pluginManagement {
     maven {
       url = uri("https://mirror.dkm.cz/eclipse//technology/epp/downloads/release/")
       content {
-        // disable this repository because it does not contain
+        // disable this repository because it does not contain 2020-06 anymore
         excludeGroupByRegex(".*")
       }
     }
